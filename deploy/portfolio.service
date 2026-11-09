@@ -1,0 +1,15 @@
+# systemd user unit for ryancaudill.dev on the Pi. scripts/deploy.sh copies
+# it to ~/.config/systemd/user/. cloudflared's route for ryancaudill.dev
+# points at http://localhost:8080.
+
+[Unit]
+Description=ryancaudill.dev portfolio
+After=network-online.target
+
+[Service]
+ExecStart=%h/apps/portfolio/current/portfolio -addr 127.0.0.1:8080
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

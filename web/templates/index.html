@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Site.Name}} · ryancaudill.dev</title>
+<meta name="description" content="{{.Site.Name}}: side projects self-hosted on a Raspberry Pi.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/status.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="logo" href="/">ryan@pi<span>:~$</span></a>
+  <nav>
+    <a href="#projects">Projects</a>
+    <a href="#resume">Resume</a>
+    {{- range .Site.Links}}
+    <a href="{{.URL}}">{{.Label}}</a>
+    {{- end}}
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="about">
+  <div class="intro">
+    <p class="pill" data-state="up"><span class="led"></span>served live from this board</p>
+    <h1>{{.Site.Name}}</h1>
+    <p class="role">{{.Site.Role}}</p>
+    {{- range .Site.About}}
+    <p class="about">{{.}}</p>
+    {{- end}}
+    <div class="actions">
+      <a class="btn btn--primary" href="#projects">See what's running</a>
+      {{- with .Site.ResumePDF}}
+      <a class="btn" href="{{.}}">Resume (PDF)</a>
+      {{- end}}
+    </div>
+  </div>
+  <figure class="board">
+    {{template "pi.html"}}
+    <figcaption>fig. 1 · the server · {{.Site.Board}}</figcaption>
+  </figure>
+</section>
+
+<section class="terminal" id="projects" aria-label="Projects running on the Pi">
+  <div class="terminal__bar">ryan@pi: ~</div>
+  <div class="terminal__body">
+    <p class="cmd"><span>$</span> systemctl list-units --state=running</p>
+    <ul class="units">
+      {{- range .Rows}}
+      <li>
+        {{- if .URL}}<a class="unit" href="{{.URL}}" data-service="{{.ID}}" data-state="{{.State}}">{{else}}<div class="unit" data-service="{{.ID}}" data-state="{{.State}}">{{end}}
+          <span class="led"></span>
+          <span class="unit__id">{{.ID}}</span>
+          <span class="unit__host">{{.Host}}</span>
+          <span class="unit__desc">{{.Description}}</span>
+          <span class="unit__state" data-state-text>{{.Text}}</span>
+        {{if .URL}}</a>{{else}}</div>{{end}}
+      </li>
+      {{- end}}
+    </ul>
+
+    {{- if .Site.Archive}}
+    <p class="cmd"><span>$</span> ls ~/archive</p>
+    <ul class="units">
+      {{- range .Site.Archive}}
+      <li>
+        {{- if .URL}}<a class="unit" href="{{.URL}}" data-state="dead">{{else}}<div class="unit" data-state="dead">{{end}}
+          <span class="led"></span>
+          <span class="unit__id">{{.Name}}</span>
+          <span class="unit__host"></span>
+          <span class="unit__desc">{{.Description}}</span>
+          <span class="unit__state">inactive (dead)</span>
+        {{if .URL}}</a>{{else}}</div>{{end}}
+      </li>
+      {{- end}}
+    </ul>
+    {{- end}}
+
+    <p class="cmd"><span>$</span> <span class="cursor"></span></p>
+  </div>
+</section>
+
+<section class="resume" id="resume">
+  <div class="resume__head">
+    <h2><span>$</span> cat resume</h2>
+    {{- with .Site.ResumePDF}}
+    <a class="btn" href="{{.}}">Download PDF</a>
+    {{- end}}
+  </div>
+  <div class="resume__grid">
+    <div>
+      <h3>Experience</h3>
+      <ol class="entries">
+        {{- range .Site.Resume.Experience}}
+        <li><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}} · {{.}}{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
+        {{- end}}
+      </ol>
+    </div>
+    <div>
+      <h3>Education</h3>
+      <ol class="entries">
+        {{- range .Site.Resume.Education}}
+        <li><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}} · {{.}}{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
+        {{- end}}
+      </ol>
+      {{- with .Site.Resume.Skills}}
+      <h3>Skills</h3>
+      <ul class="skills">
+        {{- range .}}
+        <li>{{.}}</li>
+        {{- end}}
+      </ul>
+      {{- end}}
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <span>uptime <b data-host="uptime">{{or .Host.Uptime "–"}}</b> · load <b data-host="load">{{or .Host.Load "–"}}</b> · temp <b data-host="temp">{{or .Host.Temp "–"}}</b></span>
+  <span>© {{.Site.Name}} · {{.Version}}</span>
+</footer>
+
+</div>
+</body>
+</html>

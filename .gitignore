@@ -1,0 +1,42 @@
+# Build output: `make build` / `make build-pi` binaries, rebuilt on every deploy
+/bin/
+
+# Go test and profiling output
+*.test
+*.out
+coverage.*
+*.prof
+*.pprof
+
+# Local Go workspace (points at checkouts on this Mac only)
+go.work
+go.work.sum
+
+# Secrets and local overrides; nothing here needs them, so keep any that
+# appear out of Git
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_*
+
+# Planning notes stay local, never committed
+plan.md
+
+# Claude Code files stay local: this repo isn't shared with other contributors
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# Logs and scratch files
+*.log
+tmp/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~

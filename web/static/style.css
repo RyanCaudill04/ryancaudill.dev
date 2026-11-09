@@ -1,0 +1,180 @@
+/* ryancaudill.dev: dark "real board + terminal" design. */
+
+:root {
+  --bg: #0d0f12;
+  --panel: #121519;
+  --panel-hi: #171b20;
+  --line: #2a2f36;
+  --text: #e8eaed;
+  --text-2: #c9cdd3;
+  --muted: #a3a9b3;
+  --faint: #8a9099;
+
+  /* Status light colours */
+  --up: #3ddc84;
+  --sleep: #f5b94a;
+  --down: #ff5c5c;
+  --off: #5a6069;
+
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --sans: "Inter", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--up); }
+a:hover { color: #8ff0b8; }
+h1, h2, h3, p { margin: 0; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } }
+
+/* ---------- Header ---------- */
+.top {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  justify-content: space-between; align-items: center;
+  padding: 28px 0;
+}
+.logo { font: 700 15px var(--mono); color: var(--text); text-decoration: none; }
+.logo span { color: var(--up); }
+.top nav { display: flex; flex-wrap: wrap; gap: 24px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 15px; }
+.top nav a:hover { color: var(--text); }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: flex; flex-wrap: wrap; gap: 48px; align-items: center;
+  padding: 48px 0 72px;
+}
+.intro { flex: 1 1 380px; min-width: 0; }
+.pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 20px; padding: 6px 12px;
+  border: 1px solid var(--line); border-radius: 999px;
+  font: 13px var(--mono); color: var(--muted);
+}
+h1 { font-size: clamp(40px, 5vw, 60px); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
+.role { margin-top: 16px; font-size: 20px; line-height: 1.5; color: var(--text-2); }
+.about { margin-top: 16px; font-size: 16px; line-height: 1.7; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+
+.btn {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px;
+  border: 1px solid #3a4049; border-radius: 8px;
+  color: var(--text); font-weight: 500; text-decoration: none;
+}
+.btn:hover { color: var(--text); border-color: var(--muted); }
+.btn--primary { background: var(--up); border-color: var(--up); color: #08130c; font-weight: 700; }
+.btn--primary:hover { color: #08130c; background: #6be8a3; }
+
+.board {
+  flex: 1 1 560px; max-width: 640px; min-width: 0; margin: 0;
+  padding: 24px 8px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(61, 220, 132, 0.13), rgba(13, 15, 18, 0) 68%);
+}
+.pi { display: block; width: 100%; height: auto; overflow: visible; }
+.board figcaption { margin-top: 8px; text-align: center; font: 12px var(--mono); color: var(--faint); }
+
+/* ---------- Terminal ---------- */
+.terminal {
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--panel); overflow: hidden;
+  font-family: var(--mono);
+}
+.terminal__bar { padding: 12px 20px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--faint); }
+.terminal__body { padding: 24px 20px 28px; font-size: 14px; line-height: 1.6; }
+.cmd { margin: 32px 0 16px; color: var(--text); }
+.cmd:first-child { margin-top: 0; }
+.cmd > span:first-child { color: var(--up); }
+
+.units { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; overflow-x: auto; }
+.unit {
+  display: grid;
+  grid-template-columns: 24px 160px 230px minmax(220px, 1fr) 150px;
+  gap: 12px; align-items: center;
+  min-height: 44px; padding: 8px 12px; border-radius: 6px;
+  color: var(--text); text-decoration: none;
+}
+a.unit:hover { background: var(--panel-hi); color: var(--text); }
+.unit__host { color: var(--up); }
+.unit__desc, .unit__state { color: var(--muted); }
+.unit[data-state="dead"] { color: var(--faint); }
+.unit[data-state="dead"] .unit__desc, .unit[data-state="dead"] .unit__state { color: var(--faint); }
+
+/* On a phone the columns stack: light + name on one line, the rest below. */
+@media (max-width: 860px) {
+  .unit { grid-template-columns: 24px 1fr; row-gap: 2px; }
+  .unit__host, .unit__desc, .unit__state { grid-column: 2; }
+  .unit__host:empty { display: none; }
+}
+
+.cursor {
+  display: inline-block; width: 9px; height: 18px; vertical-align: -3px;
+  background: var(--text); animation: cursor 1s steps(1) infinite;
+}
+
+/* ---------- Status lights ----------
+   An element's data-state sets the light inside it:
+   up · sleeping · starting · down · unknown · dead */
+.led {
+  display: inline-block; flex: none;
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 1.5px solid var(--off);
+}
+[data-state="up"] .led { border: 0; background: var(--up); box-shadow: 0 0 8px var(--up); animation: blink 2.2s ease-in-out infinite; }
+[data-state="sleeping"] .led { border: 0; background: var(--sleep); box-shadow: 0 0 8px var(--sleep); animation: blink 4s ease-in-out infinite; }
+[data-state="starting"] .led { border: 0; background: var(--sleep); box-shadow: 0 0 8px var(--sleep); animation: blink 0.6s ease-in-out infinite; }
+[data-state="down"] .led { border: 0; background: var(--down); box-shadow: 0 0 8px var(--down); }
+[data-state="down"] .unit__state { color: var(--down); }
+/* Stagger the blinking so the rows don't pulse in lockstep. */
+.units li:nth-child(2) .led { animation-delay: 0.4s; }
+.units li:nth-child(3) .led { animation-delay: 0.9s; }
+.units li:nth-child(4) .led { animation-delay: 1.3s; }
+
+/* LEDs inside the Pi illustration */
+.pi .blink { animation: blink 2.2s ease-in-out infinite; }
+.pi .flicker { animation: flicker 1.4s steps(1) infinite; }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes flicker {
+  0%, 100% { opacity: 1; } 12% { opacity: 0.15; } 24% { opacity: 1; } 40% { opacity: 0.3; }
+  52% { opacity: 1; } 66% { opacity: 0.1; } 74% { opacity: 1; }
+}
+@keyframes cursor { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---------- Resume ---------- */
+.resume { padding: 80px 0; }
+.resume__head { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.resume h2 { font: 700 22px var(--mono); }
+.resume h2 span { color: var(--up); }
+.resume h3 { margin: 0 0 12px; font: 500 13px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.resume h3:not(:first-child) { margin-top: 32px; }
+.resume__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 48px; }
+.entries { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.entries li { display: flex; flex-wrap: wrap; gap: 4px 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.when { flex: 0 0 130px; font: 13px var(--mono); color: var(--faint); padding-top: 2px; }
+.entries li > div { flex: 1 1 240px; line-height: 1.6; color: var(--text-2); }
+.entries b { color: var(--text); }
+.entries p { color: var(--muted); }
+.skills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.skills li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font: 13px var(--mono); color: var(--text-2); }
+
+/* ---------- Footer ---------- */
+.foot {
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+  padding: 28px 0 48px; border-top: 1px solid var(--line);
+  font: 13px var(--mono); color: var(--faint);
+}
+.foot b { font-weight: 400; color: var(--muted); }
