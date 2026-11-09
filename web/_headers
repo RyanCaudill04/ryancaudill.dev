@@ -1,0 +1,16 @@
+# Response headers for Cloudflare Pages. `make build` copies this file to
+# dist/_headers; Pages applies it and doesn't serve it.
+# Format: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  Content-Security-Policy: default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# CSS, images and the resume change rarely; let browsers keep them 5 minutes.
+/static/*
+  Cache-Control: public, max-age=300
+
+# Keep the *.pages.dev copies of the site out of search results.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex

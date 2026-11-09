@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found · ryancaudill.dev</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a class="logo" href="/">ryan@pi<span>:~$</span></a>
+</header>
+
+<main>
+<section class="terminal" aria-label="Page not found">
+  <div class="terminal__bar">ryan@pi: ~</div>
+  <div class="terminal__body">
+    <p class="cmd"><span>$</span> cat this-page</p>
+    <p>cat: this-page: No such file or directory (404)</p>
+    <p class="cmd"><span>$</span> cd <a href="/">~</a></p>
+    <p class="cmd"><span>$</span> <span class="cursor"></span></p>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <span>© {{.Site.Name}}</span>
+  <span>build <b>{{.Version}}</b></span>
+</footer>
+
+</div>
+</body>
+</html>

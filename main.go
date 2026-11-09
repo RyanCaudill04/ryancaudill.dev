@@ -1,49 +1,42 @@
-// Command portfolio serves ryancaudill.dev from the Raspberry Pi: one page
-// rendered from content/site.yaml, plus its CSS and images.
+// Command portfolio builds ryancaudill.dev: one page rendered from
+// content/site.yaml, written with its CSS and images into a folder that
+// Cloudflare Pages serves as a static site.
 //
-// Usage: portfolio [-addr host:port] [-dev]
+// Usage:
+//
+//	portfolio [-out dist] [-version v]   build the site into dist/
+//	portfolio -dev [-addr host:port]     preview it locally while editing
 package main
 
 import (
-	"embed"
 	"flag"
-	"io/fs"
 	"log"
-	"net/http"
 	"os"
-	"time"
 )
 
-// The content and the web files are built into the binary, so deploying
-// is copying one file.
-//
-//go:embed content web
-var embedded embed.FS
-
-// version is set at build time (see the Makefile).
-var version = "dev"
-
 func main() {
-	addr := flag.String("addr", "127.0.0.1:8080", "host:port to listen on")
-	dev := flag.Bool("dev", false, "read content/ and web/ from disk on every request, so edits show on refresh")
+	out := flag.String("out", "dist", "folder to build the site into")
+	ver := flag.String("version", defaultVersion(), "version shown in the footer")
+	dev := flag.Bool("dev", false, "serve a local preview instead of building; edits show on refresh")
+	addr := flag.String("addr", "127.0.0.1:8090", "host:port for -dev")
 	flag.Parse()
 
-	var files fs.FS = embedded
+	files := os.DirFS(".")
 	if *dev {
-		files = os.DirFS(".")
+		log.Printf("portfolio preview on http://%s", *addr)
+		log.Fatal(serve(*addr, files))
 	}
-	srv, err := newServer(files, *dev)
-	if err != nil {
+	if err := build(files, *out, *ver); err != nil {
 		log.Fatalf("portfolio: %v", err)
 	}
+	log.Printf("portfolio %s built into %s/", *ver, *out)
+}
 
-	log.Printf("portfolio %s on http://%s", version, *addr)
-	hs := &http.Server{
-		Addr:              *addr,
-		Handler:           srv,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      15 * time.Second,
-		IdleTimeout:       60 * time.Second,
+// defaultVersion is the short commit on Cloudflare Pages, which sets
+// CF_PAGES_COMMIT_SHA for every build, and "dev" anywhere else.
+func defaultVersion() string {
+	if sha := os.Getenv("CF_PAGES_COMMIT_SHA"); len(sha) >= 7 {
+		return sha[:7]
 	}
-	log.Fatal(hs.ListenAndServe())
+	return "dev"
 }

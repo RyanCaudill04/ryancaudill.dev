@@ -1,4 +1,6 @@
-# Build output: `make build` / `make build-pi` binaries, rebuilt on every deploy
+# Build output: `make build` writes the static site here; Cloudflare Pages
+# builds its own copy from the repo
+/dist/
 /bin/
 
 # Go test and profiling output

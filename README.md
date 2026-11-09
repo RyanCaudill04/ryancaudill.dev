@@ -1,8 +1,8 @@
 # ryancaudill.dev
 
-My portfolio. It runs on the Raspberry Pi 5 that also runs every project it lists.
+My portfolio: a static site on Cloudflare Pages. The projects it lists run on my Raspberry Pi 5.
 
-One Go program does everything: it renders the page from [`content/site.yaml`](content/site.yaml) and serves the CSS and images. The content and web files are built into the binary, so a deploy copies a single file to the Pi.
+A small Go program builds it: it renders the page from [`content/site.yaml`](content/site.yaml) and writes it, with the CSS and images, into `dist/`. Cloudflare Pages runs that build on every push to `main` and serves `dist/`.
 
 ## Edit the content
 
@@ -14,49 +14,47 @@ Everything the page says is in **[`content/site.yaml`](content/site.yaml)**: you
 make dev
 ```
 
-Then open <http://127.0.0.1:8090>. In dev mode the content and templates are reread on every request, so saving a file and refreshing shows the change. The footer's uptime, load and temperature come from the Pi's `/proc` and `/sys`, so on a Mac they show "–".
+Then open <http://127.0.0.1:8090>. The content and templates are reread on every request, so saving a file and refreshing shows the change.
 
 ```bash
 make test
 ```
 
-`make test` checks formatting, runs `go vet`, and runs the tests. It also renders the real page, so a typo in `site.yaml` or a template fails here instead of on the Pi.
-
-## Deploy to the Pi
+`make test` checks formatting, runs `go vet`, and runs the tests. The tests build the real site, so a typo in `site.yaml` or a template fails here instead of on Cloudflare.
 
 ```bash
-make deploy
+make build
 ```
 
-This runs the tests, builds a `linux/arm64` binary, copies it to `~/apps/portfolio/releases/<version>/` on the Pi (SSH host `mc-pi`, or set `PI_HOST`), points `~/apps/portfolio/current` at it, and restarts the `portfolio` user service on `127.0.0.1:8080`. Cloudflare Tunnel already routes `ryancaudill.dev` to that port.
+`make build` writes the site into `dist/` exactly as Cloudflare does: `index.html`, `404.html`, `_headers` and `static/`.
 
-```bash
-make status
-```
+## Deploy
 
-```bash
-make logs
-```
+Push to `main`. Cloudflare Pages builds and publishes it in about a minute. Pushes to other branches and pull requests get their own preview URL on `*.pages.dev`.
 
-**Rollback:** on the Pi, point `~/apps/portfolio/current` at an earlier folder in `releases/`, then run `systemctl --user restart portfolio`.
+The Pages project's build settings:
 
-### One-time handover from the placeholder site
+| Setting | Value |
+| --- | --- |
+| Framework preset | None |
+| Build command | `go run . -out dist` |
+| Build output directory | `dist` |
+| Environment variable | `GO_VERSION` = `1.27.3` (match `go.mod`) |
 
-Until now, the placeholder page was `site@portfolio.service`, deployed from the minecraft-server repo, and it also uses port 8080. `make deploy` stops with instructions while that service is still running. To hand the port over:
+The footer shows the commit it was built from (Pages sets `CF_PAGES_COMMIT_SHA`).
 
-1. In minecraft-server, remove `site@portfolio.service` from `deploy/release.json` (and its health URL), so mc-agent stops reinstalling it.
-2. Run `ssh mc-pi 'systemctl --user disable --now site@portfolio.service'`.
-3. Run `make deploy`.
+**Rollback:** in the Cloudflare dashboard, open the Pages project, go to **Deployments**, and choose **Rollback** on an earlier one.
+
+Response headers (the Content-Security-Policy and friends) are in [`web/_headers`](web/_headers). Pages applies them to every response.
 
 ## Layout
 
 ```
-main.go, server.go       the program: flags, routes, page rendering (+ test)
-internal/content/        loads and checks content/site.yaml
-internal/host/           uptime, load and temperature of the Pi
-content/site.yaml        all the page's text
-web/templates/           index.html (the page), pi.html (the Pi illustration, SVG)
-web/static/              style.css, favicon, resume.pdf
-deploy/portfolio.service systemd user unit installed on the Pi
-scripts/deploy.sh        what `make deploy` runs
+main.go             flags: build into dist/, or -dev for a local preview
+site.go             loads the content and templates, builds dist/, dev server (+ test)
+internal/content/   loads and checks content/site.yaml
+content/site.yaml   all the page's text
+web/templates/      index.html (the page), 404.html, pi.html (the Pi illustration, SVG)
+web/static/         style.css, favicon, resume.pdf
+web/_headers        response headers for Cloudflare Pages
 ```
