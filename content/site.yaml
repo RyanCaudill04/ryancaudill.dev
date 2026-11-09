@@ -6,7 +6,7 @@ name: Ryan Caudill
 role: "[Your role, e.g. Software engineer]"
 about:
   - "[A sentence or two about you: what you build and what you're learning.]"
-  - "Everything on this site, and every project below, runs on a Raspberry Pi 5 on my desk."
+  - "Every project below runs on a Raspberry Pi 5 on my desk."
 board: Raspberry Pi 5 · 16 GB · Debian 13
 
 # Put the PDF at web/static/resume.pdf, then set this to /static/resume.pdf.
@@ -41,11 +41,6 @@ projects:
     host: admin.ryancaudill.dev
     url: https://admin.ryancaudill.dev
     description: Runs the Minecraft server; sign-in required
-
-  - id: portfolio
-    host: ryancaudill.dev
-    url: https://ryancaudill.dev
-    description: This site
 
 # Past projects, shown under `ls ~/archive`. Empty hides the section.
 archive: []
