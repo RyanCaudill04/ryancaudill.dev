@@ -1,6 +1,5 @@
 // Command portfolio serves ryancaudill.dev from the Raspberry Pi: one page
-// rendered from content/site.yaml, plus GET /api/status, which checks the
-// other services on the Pi so the page's lights show whether each is up.
+// rendered from content/site.yaml, plus its CSS and images.
 //
 // Usage: portfolio [-addr host:port] [-dev]
 package main

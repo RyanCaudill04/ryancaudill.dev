@@ -17,45 +17,35 @@ links:
   - label: GitHub
     url: https://github.com/RyanCaudill04
 
-# Active projects: one row each in the terminal, with a live status light.
+# Active projects: one row each in the terminal, with a light (always on
+# for now).
 #   id          the unit name shown in the terminal
 #   host        the address shown
 #   url         where the row links; leave out when it isn't a web page
-#   health      a URL the Pi checks for the light; leave out = grey "not monitored"
-#   state_field a JSON field in the health answer holding the state
-#               (active / sleeping / starting / offline); leave out = any 2xx is up
 projects:
   - id: ai-gateway
     host: ai.ryancaudill.dev
     url: https://ai.ryancaudill.dev
     description: OpenAI-compatible gateway over free-tier LLM providers, with a chat UI
-    # Not deployed yet. When it is, give it a port other than 8080 (this
-    # site uses 8080) and add: health: http://127.0.0.1:<port>/
 
   - id: play
     host: play.ryancaudill.dev
     url: https://play.ryancaudill.dev
     description: Live status, players and world map for the Minecraft server
-    health: http://127.0.0.1:8082/api/status
-    state_field: state
 
   - id: minecraft
     host: mc.ryancaudill.dev
     description: Minecraft Java server; sleeps until someone joins
-    health: http://127.0.0.1:8082/api/status
-    state_field: state
 
   - id: admin
     host: admin.ryancaudill.dev
     url: https://admin.ryancaudill.dev
     description: Runs the Minecraft server; sign-in required
-    health: http://127.0.0.1:8081/healthz
 
   - id: portfolio
     host: ryancaudill.dev
     url: https://ryancaudill.dev
     description: This site
-    self: true
 
 # Past projects, shown under `ls ~/archive`. Empty hides the section.
 archive: []

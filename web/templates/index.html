@@ -11,7 +11,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
 <link rel="stylesheet" href="/static/style.css">
-<script src="/static/status.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -30,7 +29,7 @@
 <main>
 <section class="hero" id="about">
   <div class="intro">
-    <p class="pill" data-state="up"><span class="led"></span>served live from this board</p>
+    <p class="pill"><span class="led"></span>served live from this board</p>
     <h1>{{.Site.Name}}</h1>
     <p class="role">{{.Site.Role}}</p>
     {{- range .Site.About}}
@@ -54,14 +53,14 @@
   <div class="terminal__body">
     <p class="cmd"><span>$</span> systemctl list-units --state=running</p>
     <ul class="units">
-      {{- range .Rows}}
+      {{- range .Site.Projects}}
       <li>
-        {{- if .URL}}<a class="unit" href="{{.URL}}" data-service="{{.ID}}" data-state="{{.State}}">{{else}}<div class="unit" data-service="{{.ID}}" data-state="{{.State}}">{{end}}
+        {{- if .URL}}<a class="unit" href="{{.URL}}">{{else}}<div class="unit">{{end}}
           <span class="led"></span>
           <span class="unit__id">{{.ID}}</span>
           <span class="unit__host">{{.Host}}</span>
           <span class="unit__desc">{{.Description}}</span>
-          <span class="unit__state" data-state-text>{{.Text}}</span>
+          <span class="unit__state">active (running)</span>
         {{if .URL}}</a>{{else}}</div>{{end}}
       </li>
       {{- end}}
@@ -125,7 +124,7 @@
 </main>
 
 <footer class="foot">
-  <span>uptime <b data-host="uptime">{{or .Host.Uptime "–"}}</b> · load <b data-host="load">{{or .Host.Load "–"}}</b> · temp <b data-host="temp">{{or .Host.Temp "–"}}</b></span>
+  <span>uptime <b>{{or .Host.Uptime "–"}}</b> · load <b>{{or .Host.Load "–"}}</b> · temp <b>{{or .Host.Temp "–"}}</b></span>
   <span>© {{.Site.Name}} · {{.Version}}</span>
 </footer>
 

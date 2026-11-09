@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,20 +25,9 @@ func TestServer(t *testing.T) {
 		t.Fatalf("GET /: %d %s", page.Code, page.Body)
 	}
 	for _, p := range srv.loaded.content.Projects {
-		if !strings.Contains(page.Body.String(), `data-service="`+p.ID+`"`) {
-			t.Errorf("GET /: no row for project %q", p.ID)
+		if !strings.Contains(page.Body.String(), ">"+p.Host+"<") {
+			t.Errorf("GET /: no row for project %q (%s)", p.ID, p.Host)
 		}
-	}
-
-	api := get("/api/status")
-	var body struct {
-		Services map[string]struct{ State, Text string }
-	}
-	if err := json.Unmarshal(api.Body.Bytes(), &body); err != nil {
-		t.Fatalf("GET /api/status: %v", err)
-	}
-	if got := body.Services["portfolio"].State; got != "up" {
-		t.Errorf("GET /api/status: portfolio is %q, want up", got)
 	}
 
 	for path, code := range map[string]int{

@@ -2,23 +2,19 @@ package main
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
 	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/ryancaudill04/ryancaudill.dev/internal/content"
 	"github.com/ryancaudill04/ryancaudill.dev/internal/host"
-	"github.com/ryancaudill04/ryancaudill.dev/internal/status"
 )
 
 const contentPath = "content/site.yaml"
 
-// server serves the page, the status API and the static files.
+// server serves the page and its static files.
 type server struct {
 	files  fs.FS
 	dev    bool
@@ -30,7 +26,6 @@ type server struct {
 type site struct {
 	content content.Site
 	tmpl    *template.Template
-	checker *status.Checker
 }
 
 func newServer(files fs.FS, dev bool) (*server, error) {
@@ -47,7 +42,6 @@ func newServer(files fs.FS, dev bool) (*server, error) {
 		return nil, err
 	}
 	s.mux.HandleFunc("GET /{$}", s.index)
-	s.mux.HandleFunc("GET /api/status", s.status)
 	s.mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok\n"))
 	})
@@ -64,11 +58,7 @@ func load(files fs.FS) (*site, error) {
 	if err != nil {
 		return nil, err
 	}
-	targets := make([]status.Target, len(c.Projects))
-	for i, p := range c.Projects {
-		targets[i] = status.Target{ID: p.ID, URL: p.Health, StateField: p.StateField, Self: p.Self}
-	}
-	return &site{content: c, tmpl: tmpl, checker: status.New(targets)}, nil
+	return &site{content: c, tmpl: tmpl}, nil
 }
 
 // current returns the parsed site, reading the files again in dev mode.
@@ -90,35 +80,17 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-// row is one project in the terminal, with its light's state.
-type row struct {
-	content.Project
-	State status.State
-	Text  string
-}
-
 func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	st, err := s.current()
 	if err != nil {
 		s.fail(w, err)
 		return
 	}
-	// The first paint shows real states; status.js keeps them fresh.
-	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
-	defer cancel()
-	report := st.checker.Report(ctx)
-
-	rows := make([]row, len(st.content.Projects))
-	for i, p := range st.content.Projects {
-		svc := report.Services[p.ID]
-		rows[i] = row{Project: p, State: svc.State, Text: svc.Text}
-	}
 	data := struct {
 		Site    content.Site
-		Rows    []row
 		Host    host.Info
 		Version string
-	}{st.content, rows, host.Read(), version}
+	}{st.content, host.Read(), version}
 
 	// Render into a buffer first, so a template error is a clean 500
 	// instead of half a page.
@@ -130,24 +102,6 @@ func (s *server) index(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache")
 	buf.WriteTo(w)
-}
-
-func (s *server) status(w http.ResponseWriter, r *http.Request) {
-	st, err := s.current()
-	if err != nil {
-		s.fail(w, err)
-		return
-	}
-	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
-	defer cancel()
-	body := struct {
-		status.Report
-		Host host.Info `json:"host"`
-	}{st.checker.Report(ctx), host.Read()}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "no-store")
-	json.NewEncoder(w).Encode(body)
 }
 
 // staticFiles serves files from dir without listing folders.

@@ -12,8 +12,6 @@
 
   /* Status light colours */
   --up: #3ddc84;
-  --sleep: #f5b94a;
-  --down: #ff5c5c;
   --off: #5a6069;
 
   --mono: "JetBrains Mono", ui-monospace, monospace;
@@ -121,22 +119,14 @@ a.unit:hover { background: var(--panel-hi); color: var(--text); }
 }
 
 /* ---------- Status lights ----------
-   An element's data-state sets the light inside it:
-   up · sleeping · starting · down · unknown · dead */
+   Constant on for now; live status is on the to-do list.
+   Past projects (data-state="dead") get an unlit, hollow light. */
 .led {
   display: inline-block; flex: none;
   width: 9px; height: 9px; border-radius: 50%;
-  border: 1.5px solid var(--off);
+  background: var(--up); box-shadow: 0 0 8px var(--up);
 }
-[data-state="up"] .led { border: 0; background: var(--up); box-shadow: 0 0 8px var(--up); animation: blink 2.2s ease-in-out infinite; }
-[data-state="sleeping"] .led { border: 0; background: var(--sleep); box-shadow: 0 0 8px var(--sleep); animation: blink 4s ease-in-out infinite; }
-[data-state="starting"] .led { border: 0; background: var(--sleep); box-shadow: 0 0 8px var(--sleep); animation: blink 0.6s ease-in-out infinite; }
-[data-state="down"] .led { border: 0; background: var(--down); box-shadow: 0 0 8px var(--down); }
-[data-state="down"] .unit__state { color: var(--down); }
-/* Stagger the blinking so the rows don't pulse in lockstep. */
-.units li:nth-child(2) .led { animation-delay: 0.4s; }
-.units li:nth-child(3) .led { animation-delay: 0.9s; }
-.units li:nth-child(4) .led { animation-delay: 1.3s; }
+[data-state="dead"] .led { background: none; box-shadow: none; border: 1.5px solid var(--off); }
 
 /* LEDs inside the Pi illustration */
 .pi .blink { animation: blink 2.2s ease-in-out infinite; }

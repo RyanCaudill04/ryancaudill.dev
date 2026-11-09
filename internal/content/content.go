@@ -23,22 +23,12 @@ type Site struct {
 }
 
 // Project is one service running on the Pi, shown as a row in the
-// terminal with a status light.
+// terminal with a light.
 type Project struct {
 	ID          string `yaml:"id"`   // the unit name shown in the terminal
 	Host        string `yaml:"host"` // e.g. play.ryancaudill.dev
 	URL         string `yaml:"url"`  // link target; empty when it isn't a web page
 	Description string `yaml:"description"`
-
-	// Health is the URL the Pi checks to light the LED. Empty means the
-	// project isn't monitored and its light stays grey.
-	Health string `yaml:"health"`
-	// StateField names a JSON field in the health response that holds
-	// the state (play answers {"state": "sleeping", ...}). Empty means
-	// any 2xx response counts as up.
-	StateField string `yaml:"state_field"`
-	// Self marks this site: it's up whenever it can answer.
-	Self bool `yaml:"self"`
 }
 
 // Past is a project that no longer runs.
