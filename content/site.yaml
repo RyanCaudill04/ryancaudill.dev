@@ -11,7 +11,7 @@ board: Raspberry Pi 5 · 16 GB · Debian 13
 
 # Put the PDF at web/static/resume.pdf, then set this to /static/resume.pdf.
 # Empty hides the download button.
-resume_pdf: ""
+resume_pdf: /static/resume.pdf
 
 links:
   - label: GitHub
