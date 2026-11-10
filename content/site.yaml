@@ -3,10 +3,10 @@
 # is a placeholder to replace.
 
 name: Ryan Caudill
-role: "[Your role, e.g. Software engineer]"
+role: Software engineer at Oracle Cloud Infrastructure
 about:
-  - "[A sentence or two about you: what you build and what you're learning.]"
-  - "Every project below runs on a Raspberry Pi 5 on my desk."
+  - "I'm a software engineer at Oracle Cloud Infrastructure. I studied computer science at the University of South Carolina (B.S., with a minor in Spanish), and I've worked on a camera-synchronization system built on ROS2, a web app for the state transportation department, and a few machine learning projects."
+  - "On my own time I build in Go: a gateway that spreads requests across free-tier LLM providers, and the web tools that run a Minecraft server. I'm learning more about running services of my own, from Docker and Cloudflare to the Linux box underneath. Every project below runs on a Raspberry Pi 5 on my desk."
 board: Raspberry Pi 5 · 16 GB · Debian 13
 
 # Put the PDF at web/static/resume.pdf, then set this to /static/resume.pdf.
