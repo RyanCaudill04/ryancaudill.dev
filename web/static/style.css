@@ -1,5 +1,6 @@
 /* ryancaudill.dev: a service manual for one small computer.
-   Serif headings, mono annotations, and a 3D Pi drawn by /static/js. */
+   Serif headings, mono annotations, and a 3D Pi drawn by the scripts in
+   static/js. */
 
 /* ---------- Fonts (self-hosted, Latin subset; licences in /static/fonts) ---------- */
 @font-face {
@@ -460,6 +461,7 @@ a.unit:hover .unit__state { color: var(--text-2); }
 .foot { border-top: 1px solid var(--line); font: 13px var(--mono); color: var(--faint); }
 .foot__in { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; padding-top: 28px; padding-bottom: 44px; }
 .foot b { font-weight: 400; color: var(--muted); }
+.foot__place:has(time:empty) { display: none; } /* until main.js sets the clock */
 
 /* ---------- 404 ---------- */
 .lost { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; }

@@ -25,7 +25,7 @@ const CAMERA_DISTANCE = 430; // mm; about how far you'd hold a board to look at 
 //   open, lift, clear   how far apart the layers are; see model.js pose()
 const VIEWS = {
   hero: { yaw: -0.62, tilt: 0.6, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0 },
-  about: { yaw: -0.18, tilt: 0.86, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0 },
+  about: { yaw: -0.2, tilt: 0.72, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0 },
   closed: { yaw: -0.5, tilt: 0.42, at: [42.5, 9, 28], fit: 54, open: 0, lift: 0, clear: 0 },
   peek: { tilt: 0.4, at: [40, 30, 28], fit: 64, open: 0.86 }, // laid over hero or about when clicked open
   open: { yaw: -0.56, tilt: 0.34, at: [40, 33, 28], fit: 68, open: 1, lift: 0, clear: 0 },
@@ -59,7 +59,7 @@ function studio(renderer) {
     m.lookAt(0, 0, 0);
     room.add(m);
   };
-  panel(0xffffff, 2.1, 7, 7, 0, 5.8, 1); // overhead softbox
+  panel(0xffffff, 1.5, 7, 7, 0, 5.8, 1); // overhead softbox
   panel(0xffe6cc, 3.2, 3, 8, -5.8, 1.5, 2); // warm strip, left
   panel(0xd4e6ff, 3.2, 3, 8, 5.8, 1, -1.5); // cool strip, right
   panel(0xffffff, 1.4, 9, 3, 0, 1, 5.8); // fill from the front
@@ -77,7 +77,7 @@ function studio(renderer) {
  *   heroSlot, intro                 the hero's slot and the block it's pinned through
  *   teardown, teardownSlot          the hardware section and its slot (may be null)
  *   cards, steps                    the hardware cards and their buttons
- *   hint                            the "drag to turn" note
+ *   caption, hint                   the hero's caption, and the "drag to turn" note in it
  * Throws if WebGL isn't available.
  */
 export async function startStage(els, { drive = '2230', still = false } = {}) {
@@ -248,10 +248,12 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
     now.at = now.at.map((v, i) => damp(v, want.view.at[i], rate, dt));
 
     // Where on the canvas: between the two slots, level with the scroll.
-    const e = smooth(s.blend);
+    // It moves across early in the crossing, clear of the incoming text.
+    const e = smooth(clamp(s.blend * 1.5));
     const x = lerp(s.a.x, s.b.x, e);
     const y = lerp(s.a.y, s.b.y, s.blend);
     const size = lerp(s.a.size, s.b.size, e);
+    if (els.caption) els.caption.style.opacity = 1 - clamp(s.blend * 5);
     if (!spot.set) Object.assign(spot, { x, y, size, set: true });
     spot.x = damp(spot.x, x, 14, dt);
     spot.y = y; // straight from the page, so it never lags the scroll
@@ -287,7 +289,7 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
     const arrive = still ? 0 : 1 - smooth(clamp(age / 2.2));
     const drift = still ? 0 : 1;
     const yaw = now.yaw + hand.yaw + lean.x * 0.16 - arrive * 1.1 + Math.sin(age * 0.33) * 0.05 * drift;
-    const tilt = now.tilt + hand.tilt + lean.y * 0.09 + arrive * 0.25 + Math.sin(age * 0.27 + 1) * 0.018 * drift;
+    const tilt = now.tilt + hand.tilt + lean.y * 0.09 + arrive * 0.1 + Math.sin(age * 0.27 + 1) * 0.018 * drift;
     pivot.rotation.set(tilt, yaw, 0, 'XYZ');
     pivot.position.y = Math.sin(age * 0.9) * 0.9 * drift;
     stack.position.set(-now.at[0], -now.at[1], -now.at[2]);
@@ -297,7 +299,10 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
     // Frame it: zoom so `fit` millimetres span half the slot, then shift
     // the picture so the model's centre lands on the slot's.
     const perPx = (2 * CAMERA_DISTANCE * Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2))) / height;
-    camera.zoom = (spot.size * 0.5 * perPx) / (now.fit * (1 + arrive * 0.1));
+    // On a small screen the hardware section's slot is short and wide, and
+    // the open stack is tall, so give it more room there.
+    const room = (1 + arrive * 0.1) * (small ? lerp(1, 1.14, s.blend) : 1);
+    camera.zoom = (spot.size * 0.5 * perPx) / (now.fit * room);
     camera.aspect = width / height;
     camera.setViewOffset(width, height, width / 2 - spot.x, height / 2 - spot.y, width, height);
     camera.updateProjectionMatrix();
@@ -317,6 +322,7 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
   };
   canvas.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || !over(e)) return;
+    e.preventDefault(); // a drag on the model shouldn't start selecting the text beside it
     hand.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), from: [e.clientX, e.clientY, performance.now()] };
     hand.vyaw = hand.vtilt = 0;
     canvas.setPointerCapture(e.pointerId);

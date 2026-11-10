@@ -32,6 +32,7 @@ if (stageEl && window.WebGL2RenderingContext) {
       teardownSlot: $('[data-slot="teardown"]'),
       cards: $$('[data-layers] .layer'),
       steps: $$('[data-steps] button'),
+      caption: $('.slot--hero figcaption'),
       hint: $('[data-hint]'),
     }, { drive: stageEl.dataset.drive, still }))
     .then((api) => {

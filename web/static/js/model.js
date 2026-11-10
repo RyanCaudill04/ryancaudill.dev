@@ -161,7 +161,7 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   // Materials, shared between parts.
   const std = (o) => new THREE.MeshStandardMaterial(o);
   const M = {
-    steel: std({ color: 0xc2c6cb, metalness: 1, roughness: 0.44, roughnessMap: brushed }),
+    steel: std({ color: 0xb9bdc2, metalness: 1, roughness: 0.46, roughnessMap: brushed }),
     lid: std({ color: 0xd8dbdf, metalness: 1, roughness: 0.5, roughnessMap: brushed }),
     can: std({ color: 0xc6cacf, metalness: 1, roughness: 0.52 }),
     gold: std({ color: 0xf0c468, metalness: 1, roughness: 0.36 }),
@@ -503,9 +503,7 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
     for (const [x, z] of [[4.2, 3], [5.6, 3], [7, 3], [8.4, 4.4], [9, 16.6], [10.4, 16.6], [4.4, 19.6], [8.6, 19.8]]) caps.push([x + 0.5, 1.05, z + 0.25]);
     instances(ssd, new THREE.BoxGeometry(1, 0.5, 0.5), M.ceramic, caps);
 
-    ssdScrew.add(screw(M.steel, M.plastic, len, 0.8, 11, 0.86));
-    ssdScrew.children[0].children[1].scale.y = 0.5;
-    ssdScrew.children[0].children[1].position.y = -1.15;
+    ssdScrew.add(screw(M.steel, M.plastic, len, 0.8, 11, { scale: 0.86, thread: 2.3 }));
   }
   ssd.position.set(HAT.drive.x, DRIVE_Y, HAT.drive.z);
   ssdScrew.position.copy(ssd.position);
@@ -564,13 +562,13 @@ function noise(n) {
 }
 
 /** A pan-head screw with a cross in it: the head's underside at y, its
- *  thread hanging below. */
-function screw(steel, dark, x, y, z, scale = 1) {
+ *  thread hanging `thread` millimetres below. */
+function screw(steel, dark, x, y, z, { scale = 1, thread: length = 4.6 } = {}) {
   const g = new THREE.Group();
   const profile = [[0, 0], [2.6, 0], [2.6, 0.2], [2.45, 0.7], [1.9, 1.22], [1.1, 1.46], [0, 1.5]].map(([r, h]) => new THREE.Vector2(r, h));
   const head = new THREE.Mesh(new THREE.LatheGeometry(profile, 28), steel);
-  const thread = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 4.6, 14), steel);
-  thread.position.y = -2.3;
+  const thread = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, length, 14), steel);
+  thread.position.y = -length / 2;
   for (const m of [head, thread]) {
     m.castShadow = true;
     m.receiveShadow = true;
