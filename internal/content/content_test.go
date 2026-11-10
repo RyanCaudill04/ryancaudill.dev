@@ -20,8 +20,8 @@ func TestLoadChecksTheContent(t *testing.T) {
 		{"unknown part", "name: A\nhardware: [{part: fan, name: F}]", "not ssd, hat or pi"},
 		{"part twice", "name: A\nhardware: [{part: pi, name: P}, {part: pi, name: Q}]", "two cards"},
 		{"hardware without a name", "name: A\nhardware: [{part: pi}]", "needs a name"},
-		{"drive", "name: A\ndrive: \"2242\"", ""},
-		{"unknown drive", "name: A\ndrive: \"2280\"", "not 2230 or 2242"},
+		{"drive", "name: A\ndrive: \"2280\"", ""},
+		{"unknown drive", "name: A\ndrive: \"22110\"", "not 2230, 2242, 2260 or 2280"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

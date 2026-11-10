@@ -4,7 +4,7 @@ My portfolio: a static site on Cloudflare Pages. The projects it lists run on my
 
 A small Go program builds it: it renders the page from [`content/site.yaml`](content/site.yaml) and writes it, with the CSS, scripts and images, into `dist/`. Cloudflare Pages runs that build on every push to `main` and serves `dist/`.
 
-The page opens on a 3D model of that Pi: the board, the M.2 HAT+ on top of it, and the SSD in the HAT's slot. Drag it to turn it, click it to open it up, and scroll through the hardware section to take it apart layer by layer.
+The page opens on a 3D model of that Pi: the board, the GeeekPi P33 M.2 NVMe PoE+ HAT on top of it, and the Silicon Power SSD in the HAT's slot. Drag it to turn it, click it to open it up, and scroll through the hardware section to take it apart layer by layer.
 
 ## Edit the content
 
@@ -16,7 +16,7 @@ Nothing is loaded from a model file. [`web/static/js/model.js`](web/static/js/mo
 
 | To change | Edit |
 | --- | --- |
-| The SSD's length (30 or 42 mm) | `drive` in `content/site.yaml` |
+| The SSD's length (30, 42, 60 or 80 mm) | `drive` in `content/site.yaml` |
 | A part's size or place, or add one | `model.js`: each part is one line, e.g. `part(pi, x, z, width, depth, height, material)` |
 | Silkscreen text, the SSD's label, chip markings | `textures.js` |
 | The angle and zoom at each point of the page | `VIEWS` at the top of [`scene.js`](web/static/js/scene.js) |

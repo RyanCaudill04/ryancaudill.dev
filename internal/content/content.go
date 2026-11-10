@@ -81,7 +81,7 @@ type Entry struct {
 // sizes the model can draw.
 var (
 	parts  = map[string]bool{"ssd": true, "hat": true, "pi": true}
-	drives = map[string]bool{"2230": true, "2242": true}
+	drives = map[string]bool{"2230": true, "2242": true, "2260": true, "2280": true}
 )
 
 // Load reads and checks the content file at path in files.
@@ -131,7 +131,7 @@ func (s Site) check() error {
 		}
 	}
 	if !drives[s.Drive] {
-		return fmt.Errorf("drive %q is not 2230 or 2242", s.Drive)
+		return fmt.Errorf("drive %q is not 2230, 2242, 2260 or 2280", s.Drive)
 	}
 	return nil
 }

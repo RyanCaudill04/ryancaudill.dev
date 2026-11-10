@@ -100,7 +100,8 @@ function normal(a, b) {
 
 /** A board being painted: the colour sheet and a height sheet for the bump map. */
 class Board {
-  constructor(w, h, k) {
+  constructor(w, h, k, copper = '150, 235, 180') {
+    this.copper = copper; // the colour copper shows through the mask, as "r, g, b"
     this.w = w;
     this.h = h;
     [this.canvas, this.g] = sheet(w, h, k);
@@ -122,7 +123,7 @@ class Board {
   /** Copper under the mask: a lighter line, slightly raised. */
   trace(line, width = 0.13, alpha = 0.42) {
     const path = typeof line === 'string' ? new Path2D(line) : polyline(line);
-    this.g.strokeStyle = `rgba(150, 235, 180, ${alpha})`;
+    this.g.strokeStyle = `rgba(${this.copper}, ${alpha})`;
     this.g.lineWidth = width;
     this.g.stroke(path);
     this.b.strokeStyle = '#8c8c8c';
@@ -137,7 +138,7 @@ class Board {
 
   via(x, y, r = 0.24) {
     const { g, b } = this;
-    g.fillStyle = 'rgba(150, 235, 180, 0.55)';
+    g.fillStyle = `rgba(${this.copper}, 0.55)`;
     g.beginPath();
     g.arc(x, y, r, 0, TAU);
     g.fill();
@@ -454,60 +455,79 @@ export function paintPiBottom(k) {
 }
 
 // ---------------------------------------------------------------------------
-// The M.2 HAT+: 65 × 56 mm, the same hole pattern as the Pi under it.
+// The GeeekPi P33 M.2 NVMe PoE+ HAT: a black board, 88 × 56 mm, on the Pi's
+// hole pattern. It reaches past the Pi's USB end so a 2280 drive fits.
 // ---------------------------------------------------------------------------
+
+const BLACK_COPPER = '176, 186, 204';
 
 /** Where the HAT's parts go, shared with the model. */
 export const HAT = {
-  w: 65,
+  w: 88,
   d: 56,
-  window: [19, 37.5, 36, 12], // the cut-out, x y w h
-  socket: { x: 8.6, z: 12.9, w: 5.6, d: 23.2 }, // M.2 socket
-  drive: { x: 12.4, z: 13.5 }, // the SSD's corner at the socket
-  ffc: { x: 0.6, z: 20.6, w: 4, d: 11.8 },
-  posts: { 2230: 42.4, 2242: 54.4 }, // x of the drive's retaining post
+  vents: [[9.5, 17.5, 21, 14], [50.5, 17.5, 10, 14], [68.5, 17.5, 12, 14]], // airflow cut-outs under the drive, x y w h
+  socket: { x: 0.8, z: 12.9, w: 5.6, d: 23.2 }, // M.2 socket
+  drive: { x: 4.6, z: 13.5 }, // the SSD's corner at the socket
+  ffc: { x: 0.6, z: 20.6, d: 11.8 }, // ribbon connector, on the underside
+  posts: { 2230: 34.6, 2242: 46.6, 2260: 64.6, 2280: 84.6 }, // x of the drive's retaining post
   leds: [[5.2, 40.6], [5.2, 43.6]],
+  poe: [[61.1, 42.8], [63.64, 42.8], [61.1, 45.34], [63.64, 45.34]], // the Pi's four PoE pins
+  transformer: { x: 44, z: 40.5, w: 13, d: 11 },
+  cap: { x: 70.5, z: 47.5, r: 3.15 }, // the PoE supply's bulk capacitor
 };
+const HAT_HOLES = [[3.5, 3.5], [61.5, 3.5], [3.5, 52.5], [61.5, 52.5]];
 
 export function paintHatTop(k, drive) {
-  const B = new Board(HAT.w, HAT.d, k);
-  B.mask('#137a42', '#0b5832');
-  const [wx, wy, ww, wh] = HAT.window;
+  const B = new Board(HAT.w, HAT.d, k, BLACK_COPPER);
+  B.mask('#1b1d22', '#0c0d10');
   const mid = HAT.drive.z + 11;
-  const free = (x, y) => !((x > 6 && x < 58 && y < 7) || (x > wx - 1.5 && x < wx + ww + 1.5 && y > wy - 1.5 && y < wy + wh + 1.5) || (x < 7.5 && y < 7.5) || (x > 57.5 && y < 7.5) || (x < 7.5 && y > 48.5) || (x > 57.5 && y > 48.5) || (x > 7 && x < 57 && y > 11.5 && y < 37) || (y > 49.5 && x > 8 && x < 44));
+  const len = Number(drive.slice(2));
+  const free = (x, y) => !((x > 6 && x < 58 && y < 7) || HAT_HOLES.some(([hx, hy]) => Math.hypot(x - hx, y - hy) < 4.5) || (y > 11.5 && y < 37) || (y > 37 && x > 33 && x < 84) || (y > 48 && x > 8) || (x < 9 && y > 37 && y < 46));
 
-  B.g.fillStyle = 'rgba(160, 240, 190, 0.045)';
-  rrect(B.g, 14, 12.5, 43, 24, 1);
+  B.g.fillStyle = `rgba(${BLACK_COPPER}, 0.04)`;
+  rrect(B.g, 38, 38.5, 46, 15.5, 1); // the PoE supply's copper
   B.g.fill();
 
-  // The PCIe lane: pairs from the ribbon connector into the socket.
-  for (let i = 0; i < 4; i++) {
-    const y = mid - 3 + i * 2;
-    B.trace([[4.6, y], [6.2, y], [7, y + 0.5], [8.6, y + 0.5]], 0.14, 0.42);
-    B.trace([[4.6, y + 0.4], [6, y + 0.4], [6.8, y + 0.9], [8.6, y + 0.9]], 0.14, 0.42);
-  }
-  B.traces([[14.2, mid - 9], [20, mid - 9], [22, mid - 11], [22, 9.5]], 3, 0.4); // 3.3 V rail
-  B.trace('M5.2 40.6H9.4V36.8', 0.16, 0.36);
-  B.trace('M5.2 43.6H10.6V36.8', 0.16, 0.36);
-  B.trace('M22 9.5H30', 0.6, 0.32);
-  B.scatter(46, 41, free);
+  // The PCIe lane comes up through the board from the ribbon connector
+  // underneath: a row of vias beside the socket.
+  for (let i = 0; i < 8; i++) B.via(7.6, mid - 3.5 + i, 0.2);
+  B.traces([[7, mid - 9], [20, mid - 9], [22, mid - 11], [22, 9.5]], 3, 0.4, 0.13, 0.3); // 3.3 V rail
+  B.trace('M5.2 40.6H9.4V37.4', 0.16, 0.3);
+  B.trace('M5.2 43.6H10.6V37.4', 0.16, 0.3);
+  B.trace('M22 9.5H30', 0.6, 0.26);
+  // Power: in from the four PoE pins, through the bridges, the transformer
+  // and out to the header.
+  B.trace('M63.6 42.8H67V40.5H77', 0.5, 0.26);
+  B.trace('M63.6 45.3H66V47.5H77', 0.5, 0.26);
+  B.trace('M57 46H67', 0.7, 0.24);
+  B.trace('M44 43H41.5V10.5H38', 0.7, 0.2);
+  B.scatter(26, 41, free);
   const rand = rng(43);
-  for (let i = 0; i < 70; i++) {
-    const x = 1.5 + rand() * 62;
+  for (let i = 0; i < 60; i++) {
+    const x = 1.5 + rand() * 85;
     const y = 7.5 + rand() * 47;
     if (free(x, y)) B.via(x, y, 0.2);
   }
   // Ground stitching along the edges.
-  for (let x = 8; x <= 57; x += 1.6) B.via(x, 55, 0.2);
-  for (let y = 8; y <= 48; y += 1.6) B.via(64, y, 0.2);
+  for (let x = 8; x <= 84; x += 1.6) if (Math.abs(x - 61.5) > 4) B.via(x, 55.1, 0.2);
+  for (let y = 8; y <= 48; y += 1.6) B.via(87.1, y, 0.2);
 
-  for (const [x, y] of [[3.5, 3.5], [61.5, 3.5], [3.5, 52.5], [61.5, 52.5]]) B.ring(x, y, 3, 1.4);
+  for (const [x, y] of HAT_HOLES) B.ring(x, y, 3, 1.4);
   for (let i = 0; i < 20; i++) for (let j = 0; j < 2; j++) B.ring(8.37 + i * 2.54, 2.27 + j * 2.54, 0.82, 0.42);
-  for (const size of ['2230', '2242']) B.ring(HAT.posts[size], mid, 2.6, 0);
+  for (const [x, y] of HAT.poe) B.ring(x, y, 0.85, 0.42);
+  for (const x of Object.values(HAT.posts)) B.ring(x, mid, 2.6, 0);
   for (const [x, y] of HAT.leds) {
     B.pad(x - 1.1, y - 0.4, 0.5, 0.8);
     B.pad(x + 0.6, y - 0.4, 0.5, 0.8);
   }
+  // The transformer's pins and the capacitor's two pads.
+  const t = HAT.transformer;
+  for (let i = 0; i < 6; i++) {
+    B.pad(t.x + 1.1 + i * 2, t.z - 1.1, 0.8, 1.3);
+    B.pad(t.x + 1.1 + i * 2, t.z + t.d - 0.2, 0.8, 1.3);
+  }
+  B.pad(HAT.cap.x - 4.3, HAT.cap.z - 0.8, 1.4, 1.6);
+  B.pad(HAT.cap.x + 2.9, HAT.cap.z - 0.8, 1.4, 1.6);
 
   // Silkscreen.
   B.silkBox(6.9, 0.8, 51.2, 5.6);
@@ -515,20 +535,23 @@ export function paintHatTop(k, drive) {
     g.strokeStyle = ink;
     g.lineWidth = 0.12;
     g.setLineDash([0.8, 0.5]);
-    g.strokeRect(HAT.drive.x, HAT.drive.z, 30, 22);
-    g.strokeRect(HAT.drive.x, HAT.drive.z, 42, 22);
+    g.strokeRect(HAT.drive.x, HAT.drive.z, len, 22);
     g.setLineDash([]);
   });
-  B.silkText('2230', HAT.posts[2230], mid + 4.4, 0.95, { align: 'center', font: MONO });
-  B.silkText('2242', HAT.posts[2242], mid + 4.4, 0.95, { align: 'center', font: MONO });
+  for (const [size, x] of Object.entries(HAT.posts)) B.silkText(size, x, mid + 4.4, 0.95, { align: 'center', font: MONO });
   B.silkText('PWR', 7.2, 40.95, 0.8);
   B.silkText('ACT', 7.2, 43.95, 0.8);
-  B.silkText('PCIe', 5.9, 34.8, 0.8, { align: 'center' });
-  B.silk((g, ink) => berry(g, 10.6, 52.2, 1.05, ink));
-  B.silkText('Raspberry Pi', 12.8, 51.9, 1.45, { weight: 700 });
-  B.silkText('M.2 HAT+', 12.8, 54, 1.9, { weight: 800 });
-  B.silkText(`NVMe · ${drive}`, 31, 54, 0.95, { font: MONO });
-  B.silkText('J1', 58.8, 7.6, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
+  B.silkText('M.2 M-KEY', 3.6, 11.6, 0.8, { align: 'center' });
+  B.silkBox(HAT.poe[0][0] - 1.6, HAT.poe[0][1] - 1.6, 5.74, 5.74, 0.2);
+  B.silkText('PoE', 62.4, 40.4, 0.8, { align: 'center' });
+  B.silkBox(t.x - 0.5, t.z - 1.5, t.w + 1, t.d + 3, 0.3);
+  B.silkText('GeeekPi', 10, 51.2, 1.9, { weight: 800 });
+  B.silkText('P33 M.2 NVMe PoE+ HAT', 10, 53.6, 1.35, { weight: 700 });
+  B.silkText('802.3at · 5.1V 4.5A', 10, 55, 0.8, { font: MONO });
+  B.silkText('T1', 58, 41.6, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
+  B.silkText('C12', 74.2, 51.6, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
+  B.silkText('D1', 82.2, 40, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
+  B.silkText('D2', 82.2, 46.5, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
   B.silkText('C3', 16.6, 10.9, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
   B.silkText('U1', 24.8, 11.2, 0.6, { fill: 'rgba(240, 244, 236, 0.6)' });
   B.grain(8);
@@ -536,16 +559,17 @@ export function paintHatTop(k, drive) {
 }
 
 export function paintHatBottom(k) {
-  const B = new Board(HAT.w, HAT.d, k);
-  B.mask('#136b3f', '#0b4c2c');
-  B.scatter(90, 51, (x, y) => x > 6 && x < 59 && y > 8 && y < 36);
-  for (const [x, y] of [[3.5, 3.5], [61.5, 3.5], [3.5, 52.5], [61.5, 52.5]]) B.ring(x, y, 3, 1.4);
+  const B = new Board(HAT.w, HAT.d, k, BLACK_COPPER);
+  B.mask('#17191d', '#0b0c0f');
+  B.scatter(90, 51, (x, y) => x > 6 && x < 82 && ((y > 8 && y < 16) || (y > 33 && y < 50)));
+  for (const [x, y] of HAT_HOLES) B.ring(HAT.w - x, y, 3, 1.4);
   B.grain(9);
   return B;
 }
 
 // ---------------------------------------------------------------------------
-// The SSD: 22 mm wide, 30 or 42 long, black, gold fingers at the socket end.
+// The SSD: 22 mm wide and 30, 42, 60 or 80 long, black, gold fingers at the
+// socket end.
 // ---------------------------------------------------------------------------
 
 export function paintDrive(k, len) {
@@ -564,7 +588,7 @@ export function paintDrive(k, len) {
   for (const line of bundle([[2.6, 14.4], [4.2, 14.4], [5.4, 13.2], [7, 13.2]], 7, 0.34)) pale(line);
   for (const line of bundle([[14, 9], [16.2, 9]], 14, 0.36)) pale(line);
   const rand = rng(61);
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < len * 2; i++) {
     const x = 3 + rand() * (len - 6);
     const y = 1 + rand() * 20;
     B.g.fillStyle = 'rgba(190, 200, 215, 0.2)';
@@ -578,7 +602,7 @@ export function paintDrive(k, len) {
     B.pad(0.15, y, 2.1, 0.32, '#e2bd62', 0.05);
   }
   B.ring(len, 11, 3, 0, '#d8b561');
-  B.silkText(`M.2 ${len === 42 ? '2242' : '2230'}`, len - 4.4, 3.2, 0.9, { align: 'right', font: MONO, fill: 'rgba(240, 244, 236, 0.7)' });
+  B.silkText(`M.2 22${len}`, len - 4.4, 3.2, 0.9, { align: 'right', font: MONO, fill: 'rgba(240, 244, 236, 0.7)' });
   B.silkText('NVMe', len - 4.4, 20.4, 0.9, { align: 'right', font: MONO, fill: 'rgba(240, 244, 236, 0.7)' });
   return B;
 }
@@ -654,13 +678,12 @@ export function paintDecals(drive) {
       text(g, 'PS5027-E27T', 3.5, 4.3, 0.62, { align: 'center', font: MONO, fill: 'rgba(150,156,164,0.75)' });
       text(g, '2443  TW', 3.5, 5.3, 0.62, { align: 'center', font: MONO, fill: 'rgba(150,156,164,0.75)' });
     }),
-    // The drive's label: a white sticker over the flash chip.
-    sticker: decal(13, 17, 48, (g) => {
+    // A short drive's label: a white sticker over the flash chip.
+    sticker: drive === '2280' ? null : decal(13, 17, 48, (g) => {
       rrect(g, 0, 0, 13, 17, 0.5);
       g.fillStyle = '#f1f1ec';
       g.fill();
-      berry(g, 2, 2.75, 0.95, '#c7254e');
-      text(g, 'NVMe SSD', 3.7, 3.4, 1.62, { fill: '#15171a', weight: 800 });
+      text(g, 'NVMe SSD', 1, 3.4, 1.9, { fill: '#15171a', weight: 800 });
       text(g, `M.2 ${drive} · PCIe`, 1, 5.9, 0.98, { font: MONO, fill: '#3a3f45', weight: 500 });
       text(g, 'M key · 3.3 V', 1, 7.4, 0.82, { font: MONO, fill: '#6a7078' });
       // A barcode and a 2D code with nothing to say.
@@ -675,6 +698,51 @@ export function paintDecals(drive) {
       text(g, 'PCIe NVMe', 5.4, 13.6, 0.8, { font: MONO, fill: '#6a7078' });
       text(g, 'solid state', 5.4, 14.8, 0.8, { font: MONO, fill: '#6a7078' });
       text(g, 'drive', 5.4, 16, 0.8, { font: MONO, fill: '#6a7078' });
+    }),
+    // The 2280's label, as on a Silicon Power P34A60: black with blue facets,
+    // and a white panel for the part number and barcodes. 61 × 18 mm.
+    label: drive !== '2280' ? null : decal(61, 18, 40, (g) => {
+      rrect(g, 0, 0, 61, 18, 0.6);
+      g.clip();
+      const back = g.createLinearGradient(0, 0, 61, 18);
+      back.addColorStop(0, '#0d1424');
+      back.addColorStop(1, '#05070c');
+      g.fillStyle = back;
+      g.fillRect(0, 0, 61, 18);
+      const r2 = rng(91);
+      for (let i = 0; i < 46; i++) {
+        const x = r2() * 44;
+        const y = r2() * 18;
+        const size = 3 + r2() * 9;
+        const turn = r2() * TAU;
+        g.fillStyle = `rgba(${30 + Math.floor(r2() * 40)}, ${110 + Math.floor(r2() * 70)}, 255, ${0.04 + r2() * 0.13})`;
+        g.beginPath();
+        for (let c = 0; c < 3; c++) g.lineTo(x + Math.cos(turn + c * 2.1) * size, y + Math.sin(turn + c * 2.1) * size * 0.7);
+        g.fill();
+      }
+      text(g, 'SP', 1.6, 8.2, 5.6, { fill: '#f4f6f8', weight: 800 });
+      text(g, 'Silicon Power', 1.7, 10.6, 1.3, { fill: '#dfe5ee', weight: 600 });
+      text(g, 'Solid State Drive', 1.7, 15.4, 0.95, { font: MONO, fill: '#8fa3c2' });
+      text(g, 'P34A60', 14.4, 7.2, 3.6, { fill: '#f4f6f8', weight: 800 });
+      text(g, 'M.2 2280 · PCIe Gen3x4 · NVMe', 14.5, 9.6, 1.02, { font: MONO, fill: '#b8c4d6' });
+      text(g, '512GB', 14.4, 15.4, 3.4, { fill: '#62aeff', weight: 800 });
+      text(g, '3.3V  2.5A', 29.5, 15.4, 0.95, { font: MONO, fill: '#8fa3c2' });
+      // The white panel.
+      rrect(g, 43.2, 1.2, 16.6, 15.6, 0.4);
+      g.fillStyle = '#f1f1ec';
+      g.fill();
+      g.fillStyle = '#15171a';
+      for (const y of [2.2, 8.6]) {
+        for (let x = 44.2; x < 58.6; ) {
+          const w = 0.1 + r2() * 0.28;
+          g.fillRect(x, y, w, 2.6);
+          x += w + 0.1 + r2() * 0.22;
+        }
+      }
+      text(g, 'P/N SP512GBP34A60M28', 44.2, 6.4, 0.86, { font: MONO, fill: '#15171a', weight: 600 });
+      text(g, 'S/N', 44.2, 12.6, 0.8, { font: MONO, fill: '#3a3f45' });
+      text(g, 'Warranty void if removed', 44.2, 14.4, 0.78, { fill: '#3a3f45' });
+      text(g, 'Made in Taiwan', 44.2, 15.8, 0.78, { fill: '#6a7078' });
     }),
   };
 }
