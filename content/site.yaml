@@ -60,12 +60,24 @@ archive:
 
 resume:
   experience:
-    - title: "[Role]"
-      org: "[Company]"
-      when: "[2024 – now]"
-      summary: "[One line on what you did there.]"
+    - title: "Software Engineer"
+      org: "Oracle Cloud Infrastructure"
+      when: "Jul 2026 – now"
+      summary: "Building cloud infrastructure software at OCI in Nashville."
+    - title: "Undergraduate Research Assistant"
+      org: "IMSEL lab, University of South Carolina"
+      when: "Oct 2025 – Jun 2026"
+      summary: "Perception research: synced four camera streams at 20 Hz on a Jetson Orin with ROS2 and built a Qt GUI for data collection."
+    - title: "Software Engineer Intern"
+      org: "South Carolina Department of Transportation"
+      when: "May 2025 – Aug 2025"
+      summary: "Automated OSHA injury report submissions, cutting the time from 7 days to 15 seconds."
+    - title: "Undergraduate Teaching Assistant"
+      org: "University of South Carolina"
+      when: "Jan 2024 – Dec 2025"
+      summary: "Led 32 JavaFX project teams and ran bi-weekly code reviews across 2-week sprints."
   education:
-    - title: "[Degree]"
-      org: "[School]"
-      when: "[Year]"
-  skills: [Go, Linux, Docker, Cloudflare, "[more]"]
+    - title: "B.S. Computer Science, minor in Spanish"
+      org: "University of South Carolina"
+      when: "2022 – 2026"
+  skills: [Go, Java, Python, C++, C#, TypeScript, Linux, Docker, Git, Azure, Cloudflare, ROS, Qt, FastAPI]
