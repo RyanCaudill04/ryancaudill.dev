@@ -30,7 +30,7 @@ type Site struct {
 // Layer is one piece of the server, shown as a card in the hardware
 // section that points at its part of the 3D model.
 type Layer struct {
-	Part    string `yaml:"part"`  // the piece of the model: ssd, hat or pi
+	Part    string `yaml:"part"`  // the piece of the model: ssd, hat, cooler or pi
 	Label   string `yaml:"label"` // small heading above the name
 	Name    string `yaml:"name"`
 	Summary string `yaml:"summary"`
@@ -80,7 +80,7 @@ type Entry struct {
 // The pieces of the 3D model a hardware card can point at, and the SSD
 // sizes the model can draw.
 var (
-	parts  = map[string]bool{"ssd": true, "hat": true, "pi": true}
+	parts  = map[string]bool{"ssd": true, "hat": true, "cooler": true, "pi": true}
 	drives = map[string]bool{"2230": true, "2242": true, "2260": true, "2280": true}
 )
 
@@ -120,7 +120,7 @@ func (s Site) check() error {
 	pointed := map[string]bool{}
 	for i, l := range s.Hardware {
 		if !parts[l.Part] {
-			return fmt.Errorf("hardware[%d]: part %q is not ssd, hat or pi", i, l.Part)
+			return fmt.Errorf("hardware[%d]: part %q is not ssd, hat, cooler or pi", i, l.Part)
 		}
 		if pointed[l.Part] {
 			return fmt.Errorf("hardware: part %q has two cards", l.Part)

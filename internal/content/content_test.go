@@ -17,7 +17,7 @@ func TestLoadChecksTheContent(t *testing.T) {
 		{"project without a host", "name: A\nprojects: [{id: x}]", "needs an id and a host"},
 		{"project id twice", "name: A\nprojects: [{id: x, host: h}, {id: x, host: i}]", "used twice"},
 		{"hardware", "name: A\nhardware: [{part: ssd, name: S}, {part: pi, name: P}]", ""},
-		{"unknown part", "name: A\nhardware: [{part: fan, name: F}]", "not ssd, hat or pi"},
+		{"unknown part", "name: A\nhardware: [{part: case, name: C}]", "not ssd, hat, cooler or pi"},
 		{"part twice", "name: A\nhardware: [{part: pi, name: P}, {part: pi, name: Q}]", "two cards"},
 		{"hardware without a name", "name: A\nhardware: [{part: pi}]", "needs a name"},
 		{"drive", "name: A\ndrive: \"2280\"", ""},

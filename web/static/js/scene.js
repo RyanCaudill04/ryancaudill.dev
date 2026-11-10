@@ -22,16 +22,17 @@ const CAMERA_DISTANCE = 430; // mm; about how far you'd hold a board to look at 
 //   yaw, tilt   radians: turned about its vertical axis, then tipped toward the camera
 //   at          the point of the model (mm) held at the centre of its slot
 //   fit         the radius (mm) around that point that has to fit in the slot
-//   open, lift, clear   how far apart the layers are; see model.js pose()
+//   open, lift, clear, bare   how far apart the layers are; see model.js pose()
 const VIEWS = {
-  hero: { yaw: -0.62, tilt: 0.6, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0 },
-  about: { yaw: -0.2, tilt: 0.72, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0 },
-  closed: { yaw: -0.5, tilt: 0.42, at: [42.5, 9, 28], fit: 54, open: 0, lift: 0, clear: 0 },
+  hero: { yaw: -0.62, tilt: 0.6, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0, bare: 0 },
+  about: { yaw: -0.2, tilt: 0.72, at: [42.5, 9, 28], fit: 50, open: 0, lift: 0, clear: 0, bare: 0 },
+  closed: { yaw: -0.5, tilt: 0.42, at: [42.5, 9, 28], fit: 54, open: 0, lift: 0, clear: 0, bare: 0 },
   peek: { tilt: 0.4, at: [40, 30, 28], fit: 64, open: 0.86 }, // laid over hero or about when clicked open
-  open: { yaw: -0.56, tilt: 0.34, at: [40, 33, 28], fit: 68, open: 1, lift: 0, clear: 0 },
-  ssd: { yaw: -0.86, tilt: 0.48, at: [35, 45, 27], fit: 55, open: 1, lift: 1, clear: 0 },
-  hat: { yaw: -0.32, tilt: 0.52, at: [38, 34, 28], fit: 62, open: 1, lift: 0, clear: 0 },
-  pi: { yaw: -0.52, tilt: 0.8, at: [42.5, 4, 28], fit: 54, open: 1, lift: 0, clear: 1 },
+  open: { yaw: -0.56, tilt: 0.34, at: [40, 33, 28], fit: 68, open: 1, lift: 0, clear: 0, bare: 0 },
+  ssd: { yaw: -0.86, tilt: 0.48, at: [35, 45, 27], fit: 55, open: 1, lift: 1, clear: 0, bare: 0 },
+  hat: { yaw: -0.32, tilt: 0.52, at: [38, 34, 28], fit: 62, open: 1, lift: 0, clear: 0, bare: 0 },
+  cooler: { yaw: -0.4, tilt: 0.72, at: [42.5, 9, 28], fit: 54, open: 1, lift: 0, clear: 1, bare: 0 },
+  pi: { yaw: -0.52, tilt: 0.8, at: [42.5, 4, 28], fit: 54, open: 1, lift: 0, clear: 1, bare: 1 },
 };
 // The hardware section's scroll, 0..1: the stack opens over the first
 // stretch, each layer gets an equal share, and it closes over the last.
@@ -244,7 +245,7 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
     // (the model follows the scroll directly) keep up with it closely.
     const want = wanted(s);
     const rate = still ? 60 : want.scrub ? 9 : 3.6;
-    for (const k of ['yaw', 'tilt', 'fit', 'open', 'lift', 'clear']) now[k] = damp(now[k], want.view[k], rate, dt);
+    for (const k of ['yaw', 'tilt', 'fit', 'open', 'lift', 'clear', 'bare']) now[k] = damp(now[k], want.view[k], rate, dt);
     now.at = now.at.map((v, i) => damp(v, want.view.at[i], rate, dt));
 
     // Where on the canvas: between the two slots, level with the scroll.
@@ -293,8 +294,8 @@ export async function startStage(els, { drive = '2230', still = false } = {}) {
     pivot.rotation.set(tilt, yaw, 0, 'XYZ');
     pivot.position.y = Math.sin(age * 0.9) * 0.9 * drift;
     stack.position.set(-now.at[0], -now.at[1], -now.at[2]);
-    model.pose(Math.max(now.open, arrive * 0.32), now.lift, now.clear);
-    model.tick(age, still ? 1 : clamp((age - 1.1) / 0.7));
+    model.pose(Math.max(now.open, arrive * 0.32), now.lift, now.clear, now.bare);
+    model.tick(age, still ? 1 : clamp((age - 1.1) / 0.7), still);
 
     // Frame it: zoom so `fit` millimetres span half the slot, then shift
     // the picture so the model's centre lands on the slot's.

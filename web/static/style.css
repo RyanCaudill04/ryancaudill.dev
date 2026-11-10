@@ -301,7 +301,7 @@ button { font: inherit; color: inherit; }
 .layer dd { text-align: right; color: var(--text); }
 .steps { display: none; }
 
-.has-3d .teardown { height: 460vh; }
+.has-3d .teardown { height: 580vh; }
 .has-3d .teardown__pin { position: sticky; top: 0; height: 100vh; height: 100svh; }
 .has-3d .teardown__in {
   height: 100%; padding-top: var(--top); padding-bottom: 0;

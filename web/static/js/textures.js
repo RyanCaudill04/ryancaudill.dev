@@ -669,6 +669,15 @@ export function paintDecals(drive) {
       g.stroke();
       berry(g, 6, 4.3, 1.05, 'rgba(84, 92, 100, 0.6)');
     }),
+    // The sticker on the fan's hub.
+    fan: decal(8.4, 8.4, 48, (g) => {
+      g.fillStyle = '#e8eaed';
+      g.beginPath();
+      g.arc(4.2, 4.2, 4.1, 0, TAU);
+      g.fill();
+      berry(g, 4.2, 3.7, 1.25, '#c7254e');
+      text(g, 'DC 5V 0.25A', 4.2, 6.9, 0.72, { align: 'center', font: MONO, fill: '#3a3f45' });
+    }),
     hatReg: decal(3, 3, 48, (g) => {
       text(g, 'AP22', 1.5, 1.4, 0.6, { align: 'center', font: MONO, fill: laser });
       text(g, '653', 1.5, 2.2, 0.6, { align: 'center', font: MONO, fill: laser });
