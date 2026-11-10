@@ -1,133 +1,228 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Site.Name}} · ryancaudill.dev</title>
-<meta name="description" content="{{.Site.Name}}: side projects self-hosted on a Raspberry Pi.">
-<meta name="color-scheme" content="dark">
-<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
-<link rel="stylesheet" href="/static/style.css">
+<meta name="description" content="{{.Site.Name}}: {{.Site.Role}}. My side projects run on a Raspberry Pi 5 on my desk.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{.Site.Name}} · ryancaudill.dev">
+<meta property="og:description" content="{{.Site.Role}}. My side projects run on a Raspberry Pi 5 on my desk.">
+<meta property="og:image" content="https://ryancaudill.dev/static/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+{{- template "assets"}}
+<script type="module" src="/static/js/main.js"></script>
 </head>
 <body>
-<div class="wrap">
+<a class="skip" href="#main">Skip to the content</a>
 
-<header class="top">
-  <a class="logo" href="/">ryan@pi<span>:~$</span></a>
-  <nav>
-    <a href="#projects">Projects</a>
-    <a href="#resume">Resume</a>
-    {{- range .Site.Links}}
-    <a href="{{.URL}}">{{.Label}}</a>
-    {{- end}}
-  </nav>
+<header class="top" data-top>
+  <div class="wrap top__in">
+    <a class="logo" href="#top">ryan@pi<span>:~$</span></a>
+    <nav aria-label="Sections">
+      <a class="nav--wide" href="#about">About</a>
+      {{- if .Site.Hardware}}
+      <a class="nav--wide" href="#hardware">Hardware</a>
+      {{- end}}
+      <a href="#projects">Projects</a>
+      <a href="#resume">Resume</a>
+      {{- range .Site.Links}}
+      <a href="{{.URL}}">{{.Label}}{{template "icon-out"}}</a>
+      {{- end}}
+    </nav>
+  </div>
+  <div class="top__bar" data-progress aria-hidden="true"></div>
 </header>
 
-<main>
-<section class="hero" id="about">
-  <div class="intro">
-    <p class="pill"><span class="led"></span>my projects run on this board</p>
-    <h1>{{.Site.Name}}</h1>
-    <p class="role">{{.Site.Role}}</p>
-    {{- range .Site.About}}
-    <p class="about">{{.}}</p>
-    {{- end}}
-    <div class="actions">
-      <a class="btn btn--primary" href="#projects">See what's running</a>
-      {{- with .Site.ResumePDF}}
-      <a class="btn" href="{{.}}">Resume (PDF)</a>
-      {{- end}}
-    </div>
+<main id="main">
+
+{{/* The stage: the 3D Pi is drawn on one canvas that stays pinned to the
+     screen while this part of the page scrolls over it. The two "slots"
+     mark where the model sits; the scene moves it from one to the other. */}}
+<div class="stage" data-stage data-drive="{{.Site.Drive}}">
+  <div class="stage__view" data-view aria-hidden="true">
+    <div class="stage__grid"></div>
+    <div class="stage__glow" data-glow></div>
+    <canvas class="stage__canvas" data-canvas></canvas>
+    <svg class="stage__lines" data-lines><path class="lead" data-lead pathLength="1" d="M0 0"/><circle class="lead__ring" data-lead-ring r="7"/><circle class="lead__dot" data-lead-dot r="2.5"/></svg>
   </div>
-  <figure class="board">
-    {{template "pi.html"}}
-    <figcaption>fig. 1 · the project server · {{.Site.Board}}</figcaption>
-  </figure>
-</section>
 
-<section class="terminal" id="projects" aria-label="Projects running on the Pi">
-  <div class="terminal__bar">ryan@pi: ~</div>
-  <div class="terminal__body">
-    <p class="cmd"><span>$</span> systemctl list-units --state=running</p>
-    <ul class="units">
-      {{- range .Site.Projects}}
-      <li>
-        {{- if .URL}}<a class="unit" href="{{.URL}}">{{else}}<div class="unit">{{end}}
-          <span class="led"></span>
-          <span class="unit__id">{{.ID}}</span>
-          <span class="unit__host">{{.Host}}</span>
-          <span class="unit__desc">{{.Description}}</span>
-          <span class="unit__state">active (running)</span>
-        {{if .URL}}</a>{{else}}</div>{{end}}
-      </li>
-      {{- end}}
-    </ul>
+  <div class="stage__flow">
+    <div class="wrap intro" id="top">
+      <section class="hero">
+        <p class="pill"><span class="led"></span>my projects run on this board</p>
+        <h1 class="hero__name">{{range words .Site.Name}}<span>{{.}} </span>{{end}}</h1>
+        <p class="hero__role">{{.Site.Role}}</p>
+        <div class="actions">
+          <a class="btn btn--primary" href="#projects">See what's running{{template "icon-down"}}</a>
+          {{- with .Site.ResumePDF}}
+          <a class="btn" href="{{.}}">Resume (PDF){{template "icon-file"}}</a>
+          {{- end}}
+        </div>
+      </section>
 
-    {{- if .Site.Archive}}
-    <p class="cmd"><span>$</span> ls ~/archive</p>
-    <ul class="units">
-      {{- range .Site.Archive}}
-      <li>
-        {{- if .URL}}<a class="unit" href="{{.URL}}" data-state="dead">{{else}}<div class="unit" data-state="dead">{{end}}
-          <span class="led"></span>
-          <span class="unit__id">{{.Name}}</span>
-          <span class="unit__host"></span>
-          <span class="unit__desc">{{.Description}}</span>
-          <span class="unit__state">inactive (dead)</span>
-        {{if .URL}}</a>{{else}}</div>{{end}}
-      </li>
-      {{- end}}
-    </ul>
+      <figure class="slot slot--hero">
+        <div class="slot__art" data-slot="hero">{{template "pi.html"}}</div>
+        <figcaption>
+          <span>fig. 1 · the project server · {{.Site.Board}}</span>
+          <span class="slot__hint" data-hint>drag to turn it · click to open it</span>
+        </figcaption>
+      </figure>
+
+      <section class="about" id="about">
+        <p class="eyebrow"><b>01</b>About</p>
+        {{- range $i, $p := .Site.About}}
+        {{- if eq $i 0}}
+        <p class="lead-text" data-words>{{$p}}</p>
+        {{- else}}
+        <p class="body-text" data-reveal>{{$p}}</p>
+        {{- end}}
+        {{- end}}
+        {{- if .Site.Hardware}}
+        <a class="more" href="#hardware" data-reveal>Take the server apart{{template "icon-down"}}</a>
+        {{- end}}
+      </section>
+    </div>
+
+    {{- if .Site.Hardware}}
+    <section class="teardown" id="hardware" data-teardown aria-label="Hardware">
+      <div class="teardown__pin">
+        <div class="wrap teardown__in">
+          <div class="slot slot--teardown" data-slot="teardown"></div>
+          <div class="teardown__copy">
+            <p class="eyebrow"><b>02</b>Hardware</p>
+            <h2 class="title">The server, <em>taken apart.</em></h2>
+            <ol class="layers" data-layers>
+              {{- range .Site.Hardware}}
+              <li class="layer" data-part="{{.Part}}">
+                <p class="layer__label">{{.Label}}</p>
+                <h3>{{.Name}}</h3>
+                <p class="layer__text">{{.Summary}}</p>
+                {{- with .Specs}}
+                <dl>
+                  {{- range .}}
+                  <div><dt>{{.Name}}</dt><dd>{{.Value}}</dd></div>
+                  {{- end}}
+                </dl>
+                {{- end}}
+              </li>
+              {{- end}}
+            </ol>
+            <div class="steps js-only" data-steps role="group" aria-label="Layers">
+              {{- range .Site.Hardware}}
+              <button type="button" data-step="{{.Part}}"><span class="sr-only">Show the </span>{{.Name}}</button>
+              {{- end}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
     {{- end}}
+  </div>
+</div>
 
-    <p class="cmd"><span>$</span> <span class="cursor"></span></p>
+<section class="projects" id="projects">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow"><b>03</b>Projects</p>
+      <h2 class="title">What's <em>running.</em></h2>
+    </div>
+
+    <div class="terminal" data-terminal data-reveal aria-label="Projects running on the Pi">
+      <div class="terminal__bar"><span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="terminal__title">ryan@pi: ~</span></div>
+      <div class="terminal__body" data-term-body>
+        <p class="cmd"><span>$</span> systemctl list-units --state=running</p>
+        <ul class="units">
+          {{- range .Site.Projects}}
+          <li>
+            {{- if .URL}}<a class="unit" href="{{.URL}}" data-unit="{{.ID}}">{{else}}<div class="unit" data-unit="{{.ID}}">{{end}}
+              <span class="led"></span>
+              <span class="unit__id">{{.ID}}</span>
+              <span class="unit__host">{{.Host}}</span>
+              <span class="unit__desc">{{.Description}}</span>
+              <span class="unit__state">active (running)</span>
+            {{if .URL}}</a>{{else}}</div>{{end}}
+          </li>
+          {{- end}}
+        </ul>
+
+        {{- if .Site.Archive}}
+        <p class="cmd"><span>$</span> ls ~/archive</p>
+        <ul class="units">
+          {{- range .Site.Archive}}
+          <li>
+            {{- if .URL}}<a class="unit" href="{{.URL}}" data-past="{{.Name}}" data-state="dead">{{else}}<div class="unit" data-past="{{.Name}}" data-state="dead">{{end}}
+              <span class="led"></span>
+              <span class="unit__id">{{.Name}}</span>
+              <span class="unit__host"></span>
+              <span class="unit__desc">{{.Description}}</span>
+              <span class="unit__state">inactive (dead)</span>
+            {{if .URL}}</a>{{else}}</div>{{end}}
+          </li>
+          {{- end}}
+        </ul>
+        {{- end}}
+
+        <div class="term__log" data-term-log role="log" aria-label="Command output"></div>
+        <p class="cmd term__line">
+          <label for="term-input"><span>$</span><span class="sr-only"> Type a command</span></label>
+          <span class="term__field js-only"><input id="term-input" data-term-input type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-describedby="term-tip"><span class="term__ghost" data-term-ghost aria-hidden="true"></span></span>
+          <span class="cursor no-js-only"></span>
+        </p>
+        <p class="term__tip js-only" id="term-tip">This prompt works. Try
+          <button type="button" data-run="help">help</button>
+          <button type="button" data-run="neofetch">neofetch</button>
+          {{- range $i, $p := .Site.Projects}}{{if eq $i 0}}
+          <button type="button" data-run="systemctl status {{$p.ID}}">systemctl status</button>
+          {{- end}}{{end}}
+          <button type="button" data-run="explode">explode</button>
+        </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="resume" id="resume">
-  <div class="resume__head">
-    <h2><span>$</span> cat resume</h2>
-    {{- with .Site.ResumePDF}}
-    <a class="btn" href="{{.}}">Download PDF</a>
-    {{- end}}
-  </div>
-  <div class="resume__grid">
-    <div>
-      <h3>Experience</h3>
-      <ol class="entries">
-        {{- range .Site.Resume.Experience}}
-        <li><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}} · {{.}}{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
-        {{- end}}
-      </ol>
-    </div>
-    <div>
-      <h3>Education</h3>
-      <ol class="entries">
-        {{- range .Site.Resume.Education}}
-        <li><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}} · {{.}}{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
-        {{- end}}
-      </ol>
-      {{- with .Site.Resume.Skills}}
-      <h3>Skills</h3>
-      <ul class="skills">
-        {{- range .}}
-        <li>{{.}}</li>
-        {{- end}}
-      </ul>
+  <div class="wrap">
+    <div class="section-head section-head--split" data-reveal>
+      <div>
+        <p class="eyebrow"><b>04</b>Resume</p>
+        <h2 class="title">Where I've <em>worked.</em></h2>
+      </div>
+      {{- with .Site.ResumePDF}}
+      <a class="btn" href="{{.}}">Download PDF{{template "icon-file"}}</a>
       {{- end}}
+    </div>
+    <div class="resume__grid">
+      <div>
+        <h3 class="label">Experience</h3>
+        <ol class="entries entries--now">
+          {{- range .Site.Resume.Experience}}
+          <li data-reveal><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}}<span class="org">{{.}}</span>{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
+          {{- end}}
+        </ol>
+      </div>
+      <div>
+        <h3 class="label">Education</h3>
+        <ol class="entries">
+          {{- range .Site.Resume.Education}}
+          <li data-reveal><span class="when">{{.When}}</span><div><b>{{.Title}}</b>{{with .Org}}<span class="org">{{.}}</span>{{end}}{{with .Summary}}<p>{{.}}</p>{{end}}</div></li>
+          {{- end}}
+        </ol>
+        {{- with .Site.Resume.Skills}}
+        <h3 class="label">Skills</h3>
+        <ul class="skills" data-reveal>
+          {{- range .}}
+          <li>{{.}}</li>
+          {{- end}}
+        </ul>
+        {{- end}}
+      </div>
     </div>
   </div>
 </section>
 </main>
 
-<footer class="foot">
-  <span>© {{.Site.Name}}</span>
-  <span>build <b>{{.Version}}</b></span>
-</footer>
-
-</div>
+{{template "foot" .}}
 </body>
 </html>

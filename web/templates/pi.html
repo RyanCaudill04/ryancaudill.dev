@@ -1,4 +1,5 @@
-{{/* The Raspberry Pi 5 illustration, drawn in millimetres (the board is 85 × 56). "blink" and "flicker" animate the LEDs; see style.css. */}}
+{{/* The Raspberry Pi 5 illustration, drawn in millimetres (the board is 85 × 56). "blink" and "flicker" animate the LEDs; see style.css.
+     The page shows it when the 3D model can't run: no JavaScript, or no WebGL. */}}
 <svg role="img" aria-label="Detailed illustration of the Raspberry Pi 5 that runs these projects, with its power and activity lights on" viewBox="-3 -3 95 65" class="pi">
 <defs>
 <linearGradient id="pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b8d57"></stop><stop offset="1" stop-color="#155c37"></stop></linearGradient>
@@ -102,6 +103,7 @@
 <rect x="58.4" y="7.2" width="5.6" height="2.8" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1" filter="url(#soft)"></rect>
 <rect x="59" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="60.3" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="61.6" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="62.9" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect>
 
+<g transform="translate(0 35.6)">
 <rect x="65.5" y="2" width="22" height="16.5" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
 <rect x="66.4" y="2.9" width="20.2" height="14.7" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.18"></rect>
 <g stroke="#a6acb3" stroke-width="0.14" stroke-opacity="0.8"><path d="M70.5 6.2H83.5M70.5 8.2H83.5M70.5 10.2H83.5M70.5 12.2H83.5M70.5 14.2H83.5"></path></g>
@@ -110,18 +112,23 @@
 <rect class="blink" x="87.1" y="3" width="0.9" height="1.6" fill="#3ddc84"></rect>
 <circle class="flicker" cx="87.6" cy="16.7" r="1.4" fill="#f5b94a" opacity="0.5" filter="url(#glow)"></circle>
 <rect class="flicker" x="87.1" y="15.9" width="0.9" height="1.6" fill="#f5b94a"></rect>
+</g>
 
+<g transform="translate(0 -0.8)">
 <rect x="69.5" y="21" width="17.5" height="14" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
 <rect x="70.3" y="21.8" width="15.9" height="12.4" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.16"></rect>
 <path d="M70.3 28H86.2" stroke="#9aa1a9" stroke-width="0.16"></path>
 <circle cx="73" cy="24.9" r="0.45" fill="#a6acb3"></circle><circle cx="73" cy="31.1" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="24.9" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="31.1" r="0.45" fill="#a6acb3"></circle>
 <rect x="86.3" y="22.3" width="0.7" height="4.9" fill="#2d6fe0"></rect><rect x="86.3" y="28.8" width="0.7" height="4.9" fill="#2d6fe0"></rect>
+</g>
 
+<g transform="translate(0 -36.6)">
 <rect x="69.5" y="39" width="17.5" height="14" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
 <rect x="70.3" y="39.8" width="15.9" height="12.4" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.16"></rect>
 <path d="M70.3 46H86.2" stroke="#9aa1a9" stroke-width="0.16"></path>
 <circle cx="73" cy="42.9" r="0.45" fill="#a6acb3"></circle><circle cx="73" cy="49.1" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="42.9" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="49.1" r="0.45" fill="#a6acb3"></circle>
 <rect x="86.3" y="40.3" width="0.7" height="4.9" fill="#26292d"></rect><rect x="86.3" y="46.8" width="0.7" height="4.9" fill="#26292d"></rect>
+</g>
 
 <rect x="45.8" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)" filter="url(#soft)"></rect><rect x="45.8" y="37.5" width="1" height="13" fill="#1b1d20"></rect>
 <rect x="50.2" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)" filter="url(#soft)"></rect><rect x="50.2" y="37.5" width="1" height="13" fill="#1b1d20"></rect>

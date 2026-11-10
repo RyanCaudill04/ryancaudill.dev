@@ -9,6 +9,46 @@ about:
   - "On my own time I build in Go: a gateway that spreads requests across free-tier LLM providers, and the web tools that run a Minecraft server. I'm learning more about running services of my own, from Docker and Cloudflare to the Linux box underneath. Every project below runs on a Raspberry Pi 5 on my desk."
 board: Raspberry Pi 5 · 16 GB · Debian 13
 
+# The hardware section: one card per layer of the 3D model, top layer
+# first. Scrolling takes the model apart, and each card points at its part.
+#   part      the piece of the model the card points at: ssd, hat or pi
+#   label     the small heading above the name
+#   specs     short name/value rows under the summary; leave out for none
+hardware:
+  - part: ssd
+    label: Storage
+    name: NVMe SSD
+    summary: "Solid-state storage on the Pi's PCIe lane: quicker than a microSD card, and far happier with the constant small writes a server makes."
+    specs:
+      - { name: Interface, value: NVMe over PCIe }
+      - { name: Slot, value: "M.2, M key" }
+
+  - part: hat
+    label: Bridge
+    name: M.2 HAT+
+    summary: "Carries the drive. A 16-pin ribbon cable brings the Pi's single PCIe lane up to an M.2 slot, and four standoffs hold the whole thing over the board."
+    specs:
+      - { name: Link, value: "PCIe, one lane" }
+      - { name: Mount, value: "4 standoffs, GPIO pass-through" }
+
+  - part: pi
+    label: Compute
+    name: Raspberry Pi 5
+    summary: "The computer itself: a quad-core Arm board the size of a credit card. It runs Debian and every project below."
+    specs:
+      - { name: SoC, value: "BCM2712, 4 × Cortex-A76 at 2.4 GHz" }
+      - { name: Memory, value: 16 GB LPDDR4X }
+      - { name: OS, value: Debian 13 }
+
+# The SSD drawn on the 3D model: its M.2 size, 2230 (30 mm long) or
+# 2242 (42 mm long).
+drive: "2230"
+
+# Shown in the footer with the current time there. Leave either out to
+# hide it. timezone is an IANA name, e.g. America/Chicago.
+location: Nashville, TN
+timezone: America/Chicago
+
 # Put the PDF at web/static/resume.pdf, then set this to /static/resume.pdf.
 # Empty hides the download button.
 resume_pdf: /static/resume.pdf
