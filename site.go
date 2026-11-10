@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/ryancaudill04/ryancaudill.dev/internal/content"
@@ -25,6 +26,12 @@ var pages = []string{"index.html", "404.html"}
 // headers for Cloudflare Pages, and the crawler rules at /robots.txt.
 var rootFiles = []string{"_headers", "robots.txt"}
 
+// funcs are the helpers the templates can call.
+var funcs = template.FuncMap{
+	// words splits a name so the page can set each word on its own line.
+	"words": strings.Fields,
+}
+
 // site is everything parsed from the content and template files.
 type site struct {
 	content content.Site
@@ -36,7 +43,7 @@ func load(files fs.FS) (*site, error) {
 	if err != nil {
 		return nil, err
 	}
-	tmpl, err := template.ParseFS(files, "web/templates/*.html")
+	tmpl, err := template.New("").Funcs(funcs).ParseFS(files, "web/templates/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +108,33 @@ func build(files fs.FS, out, version string) error {
 	return os.CopyFS(filepath.Join(out, "static"), static)
 }
 
+// siteHeaders returns the headers web/_headers sets on every path (its
+// "/*" block). The preview sends them too, so a script, font or style the
+// Content-Security-Policy would block on the real site is blocked here
+// first.
+func siteHeaders(files fs.FS) (http.Header, error) {
+	data, err := fs.ReadFile(files, "web/_headers")
+	if err != nil {
+		return nil, err
+	}
+	headers := http.Header{}
+	everyPath := false
+	for _, line := range strings.Split(string(data), "\n") {
+		text := strings.TrimSpace(line)
+		if text == "" || strings.HasPrefix(text, "#") {
+			continue
+		}
+		if text == line { // not indented: a path pattern, starting a block
+			everyPath = text == "/*"
+			continue
+		}
+		if name, value, ok := strings.Cut(text, ":"); ok && everyPath {
+			headers.Set(name, strings.TrimSpace(value))
+		}
+	}
+	return headers, nil
+}
+
 // serve is the local preview for `make dev`. It rereads content/ and web/
 // on every request, so saving a file and refreshing shows the change.
 // Cloudflare serves the real site from the built folder.
@@ -147,6 +181,15 @@ func serve(addr string, files fs.FS) error {
 	})
 	mux.HandleFunc("/", page("404.html", http.StatusNotFound))
 
-	hs := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+	withHeaders := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if headers, err := siteHeaders(files); err == nil {
+			for name, values := range headers {
+				w.Header()[name] = values
+			}
+		}
+		mux.ServeHTTP(w, r)
+	})
+
+	hs := &http.Server{Addr: addr, Handler: withHeaders, ReadHeaderTimeout: 5 * time.Second}
 	return hs.ListenAndServe()
 }
