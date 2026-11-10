@@ -43,10 +43,23 @@ projects:
     description: Runs the Minecraft server; sign-in required
 
 # Past projects, shown under `ls ~/archive`. Empty hides the section.
-archive: []
-#  - name: some-project
-#    description: What it was and what you learned
-#    url: https://github.com/RyanCaudill04/some-project
+archive:
+  - name: gradingagent
+    description: Automated grader for CSCE 247 Java assignments; Django frontend, FastAPI backend, PostgreSQL and Gemini-based code review
+    url: https://github.com/RyanCaudill04/GradingAgent
+  - name: cifar
+    description: PyTorch CNN image classifier for CIFAR-10, tuned for Apple Silicon with mixed-precision training
+    url: https://github.com/RyanCaudill04/CIFAR
+  - name: maestro_demo
+    description: ROS2 demo for synchronizing camera streams, run in Docker
+    url: https://github.com/RyanCaudill04/maestro_demo
+  - name: dermalite
+    description: Skin lesion classifiers in PyTorch (ResNet50 with a Random Forest head), quantized with CoreML to run on-device
+  - name: gosynchro.io
+    description: Node.js and TypeScript back end for a React Native app, with CI/CD on GitHub Actions and Azure
+  - name: ryancaudill04.github.io
+    description: My previous portfolio, a static GitHub Pages site driven by local JSON content
+    url: https://github.com/RyanCaudill04/RyanCaudill04.github.io
 
 resume:
   experience:
