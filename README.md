@@ -26,7 +26,7 @@ make test
 make build
 ```
 
-`make build` writes the site into `dist/` exactly as Cloudflare does: `index.html`, `404.html`, `_headers` and `static/`.
+`make build` writes the site into `dist/` exactly as Cloudflare does: `index.html`, `404.html`, `_headers`, `robots.txt` and `static/`.
 
 ## Deploy
 
@@ -57,4 +57,5 @@ content/site.yaml   all the page's text
 web/templates/      index.html (the page), 404.html, pi.html (the Pi illustration, SVG)
 web/static/         style.css, favicon, resume.pdf
 web/_headers        response headers for Cloudflare Pages
+web/robots.txt      crawler rules, served at /robots.txt
 ```

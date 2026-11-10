@@ -38,6 +38,9 @@ func TestBuild(t *testing.T) {
 	if !strings.Contains(read("_headers"), "Content-Security-Policy") {
 		t.Error("_headers has no Content-Security-Policy")
 	}
+	if !strings.Contains(read("robots.txt"), "User-agent:") {
+		t.Error("robots.txt has no User-agent line")
+	}
 	read("static/style.css")
 	read("static/favicon.svg")
 }

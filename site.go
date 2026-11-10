@@ -21,6 +21,10 @@ const contentPath = "content/site.yaml"
 // no file for; without it, Pages would answer every path with index.html.
 var pages = []string{"index.html", "404.html"}
 
+// Files in web/ copied as-is to the root of the output folder: response
+// headers for Cloudflare Pages, and the crawler rules at /robots.txt.
+var rootFiles = []string{"_headers", "robots.txt"}
+
 // site is everything parsed from the content and template files.
 type site struct {
 	content content.Site
@@ -56,7 +60,7 @@ func (s *site) render(name, version string) ([]byte, error) {
 // build writes the whole site into out, replacing what was there:
 //
 //	index.html, 404.html   the rendered pages
-//	_headers               response headers for Cloudflare Pages (from web/)
+//	_headers, robots.txt   copied from web/
 //	static/                everything in web/static
 func build(files fs.FS, out, version string) error {
 	if clean := filepath.Clean(out); clean == "." || clean == "/" {
@@ -81,12 +85,14 @@ func build(files fs.FS, out, version string) error {
 			return err
 		}
 	}
-	headers, err := fs.ReadFile(files, "web/_headers")
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(filepath.Join(out, "_headers"), headers, 0o644); err != nil {
-		return err
+	for _, name := range rootFiles {
+		data, err := fs.ReadFile(files, "web/"+name)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(out, name), data, 0o644); err != nil {
+			return err
+		}
 	}
 	static, err := fs.Sub(files, "web/static")
 	if err != nil {
@@ -134,6 +140,10 @@ func serve(addr string, files fs.FS) error {
 	mux.HandleFunc("GET /static/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		staticFiles.ServeHTTP(w, r)
+	})
+	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		http.ServeFileFS(w, r, files, "web/robots.txt")
 	})
 	mux.HandleFunc("/", page("404.html", http.StatusNotFound))
 

@@ -1,0 +1,5 @@
+# Crawlers may index the whole site. `make build` copies this file to
+# dist/robots.txt. The *.pages.dev copies stay out of search results through
+# the X-Robots-Tag header in web/_headers.
+User-agent: *
+Allow: /
