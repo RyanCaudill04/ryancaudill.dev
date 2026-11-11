@@ -64,6 +64,9 @@ timezone: America/Chicago
 # Empty hides the download button.
 resume_pdf: /static/resume.pdf
 
+# A portrait for the header and the About section. Leave it out to hide both.
+photo: /static/ryan.jpg
+
 links:
   - label: GitHub
     url: https://github.com/RyanCaudill04

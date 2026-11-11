@@ -94,6 +94,8 @@ button { font: inherit; color: inherit; }
 .logo { font: 700 15px var(--mono); color: var(--text); text-decoration: none; }
 .logo:hover { color: var(--text); }
 .logo span { color: var(--up); }
+.logo { display: inline-flex; align-items: center; gap: 10px; }
+.logo__img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px var(--line); }
 .top nav { display: flex; gap: 4px; }
 .top nav a {
   display: inline-flex; align-items: center; gap: 4px;
@@ -260,6 +262,13 @@ button { font: inherit; color: inherit; }
 .is-live .slot__hint.is-done { opacity: 0; transition-delay: 0s; }
 
 .about { grid-area: about; padding: 6vh 0 24vh; }
+.about__head { display: flex; align-items: center; gap: 16px; }
+.about__head .eyebrow { margin: 0; }
+.about__photo {
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 0 0 1px var(--line), 0 0 0 5px var(--bg), 0 0 0 6px var(--up);
+}
+.about__head + * { margin-top: 28px; }
 .lead-text {
   font: 400 clamp(26px, 2.5vw, 36px)/1.22 var(--serif); letter-spacing: -0.005em;
   text-wrap: pretty;

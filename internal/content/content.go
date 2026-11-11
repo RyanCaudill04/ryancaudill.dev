@@ -17,6 +17,7 @@ type Site struct {
 	About     []string  `yaml:"about"` // one entry per paragraph
 	Board     string    `yaml:"board"` // caption under the Pi
 	Hardware  []Layer   `yaml:"hardware"`
+	Photo     string    `yaml:"photo"`    // portrait, shown in the header and About; leave out for none
 	Drive     string    `yaml:"drive"`    // the SSD's M.2 size on the 3D model
 	Location  string    `yaml:"location"` // shown in the footer
 	Timezone  string    `yaml:"timezone"` // IANA name, for the footer clock
