@@ -18,7 +18,9 @@
 
 <header class="top" data-top>
   <div class="wrap top__in">
-    <a class="logo" href="#top">ryan@pi<span>:~$</span></a>
+    <a class="logo" href="#top">
+      {{- with .Site.Photo}}<img class="logo__img" src="{{.}}" alt="" width="24" height="24">{{end -}}
+      ryan@pi<span>:~$</span></a>
     <nav aria-label="Sections">
       <a class="nav--wide" href="#about">About</a>
       {{- if .Site.Hardware}}
@@ -70,7 +72,12 @@
       </figure>
 
       <section class="about" id="about">
-        <p class="eyebrow"><b>01</b>About</p>
+        <div class="about__head">
+          {{- with .Site.Photo}}
+          <img class="about__photo" src="{{.}}" alt="Photo of {{$.Site.Name}}" width="72" height="72" data-reveal>
+          {{- end}}
+          <p class="eyebrow"><b>01</b>About</p>
+        </div>
         {{- range $i, $p := .Site.About}}
         {{- if eq $i 0}}
         <p class="lead-text" data-words>{{$p}}</p>

@@ -49,7 +49,7 @@ func TestBuild(t *testing.T) {
 		t.Error("robots.txt has no User-agent line")
 	}
 	read("static/style.css")
-	read("static/favicon.svg")
+	read("static/favicon.ico")
 }
 
 // TestBuildLinks checks that everything the pages load is in the build:
