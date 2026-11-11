@@ -11,25 +11,35 @@ board: Raspberry Pi 5 · 16 GB · Debian 13
 
 # The hardware section: one card per layer of the 3D model, top layer
 # first. Scrolling takes the model apart, and each card points at its part.
-#   part      the piece of the model the card points at: ssd, hat or pi
+#   part      the piece of the model the card points at: ssd, hat, cooler or pi
 #   label     the small heading above the name
 #   specs     short name/value rows under the summary; leave out for none
 hardware:
   - part: ssd
     label: Storage
-    name: NVMe SSD
-    summary: "Solid-state storage on the Pi's PCIe lane: quicker than a microSD card, and far happier with the constant small writes a server makes."
+    name: Silicon Power P34A60
+    summary: "A 512 GB NVMe drive on the Pi's PCIe lane: quicker than a microSD card, and far happier with the constant small writes a server makes."
     specs:
-      - { name: Interface, value: NVMe over PCIe }
-      - { name: Slot, value: "M.2, M key" }
+      - { name: Capacity, value: 512 GB }
+      - { name: Interface, value: "NVMe, PCIe Gen 3" }
+      - { name: Size, value: "M.2 2280, M key" }
 
   - part: hat
     label: Bridge
-    name: M.2 HAT+
-    summary: "Carries the drive. A 16-pin ribbon cable brings the Pi's single PCIe lane up to an M.2 slot, and four standoffs hold the whole thing over the board."
+    name: GeeekPi P33 M.2 HAT
+    summary: "Carries the drive. A ribbon cable brings the Pi's single PCIe lane up to a full-length M.2 slot, and the board can power the Pi over its network cable."
     specs:
       - { name: Link, value: "PCIe, one lane" }
-      - { name: Mount, value: "4 standoffs, GPIO pass-through" }
+      - { name: Slot, value: "M.2 M key, 2230 to 2280" }
+      - { name: Power, value: "PoE+ (802.3at), up to 25.5 W" }
+
+  - part: cooler
+    label: Cooling
+    name: Active Cooler
+    summary: "Keeps the processor from slowing itself down under load: an aluminium heatsink on the Pi's hot chips, and a small blower pushing air through its fins."
+    specs:
+      - { name: Fan, value: "Blower, speed set by temperature" }
+      - { name: Mount, value: "2 sprung pins, 4-pin fan socket" }
 
   - part: pi
     label: Compute
@@ -40,9 +50,10 @@ hardware:
       - { name: Memory, value: 16 GB LPDDR4X }
       - { name: OS, value: Debian 13 }
 
-# The SSD drawn on the 3D model: its M.2 size, 2230 (30 mm long) or
-# 2242 (42 mm long).
-drive: "2230"
+# The SSD drawn on the 3D model: its M.2 size, 2230, 2242, 2260 or 2280
+# (the last two digits are its length in millimetres). 2280 is drawn with
+# the Silicon Power drive's label; the shorter ones get a plain sticker.
+drive: "2280"
 
 # Shown in the footer with the current time there. Leave either out to
 # hide it. timezone is an IANA name, e.g. America/Chicago.

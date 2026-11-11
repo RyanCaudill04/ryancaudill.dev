@@ -1,6 +1,6 @@
-// The server, modelled part by part: a Raspberry Pi 5, the standoffs and
-// stacking header above it, an M.2 HAT+ on those, and an NVMe SSD in the
-// HAT's slot. No model file is loaded; every part is built here from boxes,
+// The server, modelled part by part: a Raspberry Pi 5, the Active Cooler on
+// it, the standoffs and stacking header above it, a GeeekPi P33 M.2 NVMe PoE+ HAT on those, and a
+// Silicon Power NVMe SSD in the HAT's slot. No model file is loaded; every part is built here from boxes,
 // extrusions and painted textures.
 //
 // Units are millimetres. x runs along the Pi's long edge, from the SD-card
@@ -146,13 +146,13 @@ function shell(profile, depth, material) {
 
 /**
  * Builds the whole server.
- *   drive    '2230' or '2242', the SSD's M.2 size
+ *   drive    '2230', '2242', '2260' or '2280', the SSD's M.2 size
  *   detail   texture resolution in pixels per millimetre
  * Returns the root group, an anchor on each layer for the annotations, and
  * two functions: pose() takes the stack apart, tick() runs the LEDs.
  */
 export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
-  const len = drive === '2242' ? 42 : 30;
+  const len = Number(drive.slice(2)); // the drive's length, mm
   const decals = paintDecals(drive);
   const glow = paintGlow();
   const brushed = paintBrushed();
@@ -177,6 +177,10 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
     resistor: std({ color: 0x17181b, roughness: 0.5 }),
     tin: std({ color: 0xd4d8dc, metalness: 1, roughness: 0.4 }),
     laminate: std({ color: 0x66713f, roughness: 0.75 }),
+    alloy: std({ color: 0xc9cdd2, metalness: 1, roughness: 0.38, roughnessMap: brushed }),
+    pad: std({ color: 0x8fa4b8, roughness: 0.8 }),
+    tape: std({ color: 0xd2a92e, roughness: 0.5 }),
+    sleeve: std({ color: 0x1a1b20, roughness: 0.35 }),
     hollow: std({ color: 0x0b0c0e, roughness: 0.6, side: THREE.BackSide }),
     darkLaminate: std({ color: 0x2a2b22, roughness: 0.7 }),
   };
@@ -197,6 +201,7 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   };
 
   const leds = [];
+  let spin = null; // the fan's impeller
   /** A lit LED: a bright body, and a halo on the surface it sits on. */
   const led = (parent, x, y, z, colour, kind, o = {}) => {
     const base = new THREE.Color(colour);
@@ -397,9 +402,82 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
     part(pi, -0.4, 21.6, 12.8, 12.4, 1.45, M.steel, { y: -PCB - 1.45, r: 0.3 });
     mesh(pi, new THREE.BoxGeometry(1.2, 0.9, 11), M.plastic, 0.3, -PCB - 0.75, 27.8);
 
-    // The ribbon cable: out of the Pi's PCIe connector, up and over, into
-    // the HAT's. It stays with the Pi when the stack comes apart.
+    // The ribbon cable: out of the Pi's PCIe connector, round and up into
+    // the connector under the HAT. It stays with the Pi when the stack
+    // comes apart.
     pi.add(ribbon(paintRibbon()));
+  }
+
+  // -------------------------------------------------------------------------
+  // The Active Cooler: an aluminium plate over the Pi's hot chips, a blower
+  // that draws air down and pushes it out through the fins, and two sprung
+  // pins that hold it to the board. Its own layer, so it lifts off.
+  // -------------------------------------------------------------------------
+  const cooler = new THREE.Group();
+  root.add(cooler);
+  {
+    const BASE = 2.2; // the plate's underside, resting on the chips' thermal pads
+    const TOP = 9.4;
+    // The plate, cut to miss the header, the fan socket and the connectors.
+    const plate = new THREE.Shape();
+    for (const [i, [x, z]] of [[21.5, 9], [57.5, 9], [57.5, 11.5], [62, 11.5], [62, 36.8], [21.5, 36.8], [21.5, 47.5], [10, 47.5], [10, 17.8], [21.5, 17.8]].entries()) plate[i ? 'lineTo' : 'moveTo'](x, z);
+    plate.closePath();
+    const slab = new THREE.ExtrudeGeometry(plate, { depth: 1.2, bevelEnabled: false });
+    slab.rotateX(Math.PI / 2);
+    mesh(cooler, slab, M.alloy, 0, BASE + 1.2, 0);
+    // Thermal pads: on the memory, the RP1, the power chip. The processor's
+    // lid meets the plate directly.
+    for (const [x, z, w, d, y] of [[12.6, 19.5, 7.8, 12, 1], [51.6, 24.6, 7.3, 7.3, 0.9], [11.4, 39.9, 4.7, 4.7, 0.85]]) part(cooler, x, z, w, d, BASE - y, M.pad, { y, r: 0.2, bevel: 0.04 });
+    part(cooler, 24, 20, 14, 14, BASE - 1.85, M.pad, { y: 1.85, r: 0.2, bevel: 0.04 });
+
+    // The blower's housing: a block with the fan's well cut through it.
+    const fan = { x: 35.5, z: 23, r: 11.2 };
+    const housing = rounded(22, 9.5, 27, 27, 1.2);
+    housing.holes.push(circle(fan.x, fan.z, fan.r));
+    const walls = new THREE.ExtrudeGeometry(housing, { depth: TOP - BASE - 1.2, bevelEnabled: false, curveSegments: 24 });
+    walls.rotateX(Math.PI / 2);
+    mesh(cooler, walls, M.alloy, 0, TOP, 0);
+    const well = new THREE.Mesh(new THREE.CylinderGeometry(fan.r, fan.r, TOP - BASE - 1.3, 40, 1, true), M.hollow);
+    well.position.set(fan.x, (TOP + BASE + 1.2) / 2, fan.z);
+    cooler.add(well);
+    // The impeller: a hub, a ring of blades and a rim, turned by tick().
+    const impeller = new THREE.Group();
+    impeller.position.set(fan.x, BASE + 1.3, fan.z);
+    cooler.add(impeller);
+    mesh(impeller, new THREE.CylinderGeometry(4.6, 4.8, 5.2, 32), M.plastic, 0, 2.6, 0);
+    const blade = new THREE.BoxGeometry(5.6, 4.6, 0.35);
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * Math.PI * 2;
+      const b = mesh(impeller, blade, M.plastic, Math.cos(a) * 7.6, 2.5, Math.sin(a) * 7.6);
+      b.rotation.y = -a + 0.6;
+    }
+    const rim = mesh(impeller, new THREE.TorusGeometry(10.3, 0.35, 8, 48), M.plastic, 0, 4.9, 0);
+    rim.rotation.x = Math.PI / 2;
+    const hub = label(impeller, decals.fan, -4.2, -4.2, 8.4, 8.4, 5.2, { roughness: 0.4 });
+    hub.castShadow = false;
+    spin = impeller;
+
+    // The fins the air leaves through, running toward the USB ports.
+    const fins = [];
+    for (let z = 18.1; z < 36.6; z += 1.45) fins.push([55.6, (TOP + BASE + 1.2) / 2, z]);
+    instances(cooler, new THREE.BoxGeometry(12.4, TOP - BASE - 1.2, 0.5), M.alloy, fins);
+    // A few low fins over the power chip.
+    const low = [];
+    for (let x = 11.2; x < 21; x += 1.6) low.push([x, BASE + 2.2, 42.4]);
+    instances(cooler, new THREE.BoxGeometry(0.5, 2, 9.4), M.alloy, low);
+
+    // The pins, each with its spring.
+    const top = BASE + 1.2;
+    for (const [x, z] of [[59.6, 14.4], [15.8, 35.2]]) {
+      mesh(cooler, new THREE.CylinderGeometry(0.9, 0.9, top + 4 + PCB + 1.2, 14), M.cream, x, (top + 4 - PCB - 1.2) / 2, z);
+      mesh(cooler, new THREE.CylinderGeometry(1.9, 1.9, 0.9, 20), M.cream, x, top + 4.2, z);
+      mesh(cooler, new THREE.CylinderGeometry(1.45, 1.45, 3.6, 14), M.steel, x, top + 1.9, z);
+    }
+
+    // The fan's lead, round to the socket marked FAN.
+    const lead = new THREE.CatmullRomCurve3([[49, 7.6, 12], [52, 8.2, 8.6], [57, 7, 7.6], [60.6, 5, 8.2], [61.2, 3.3, 8.6]].map((p) => new THREE.Vector3(...p)));
+    mesh(cooler, new THREE.TubeGeometry(lead, 24, 0.55, 8), M.plastic);
+    part(cooler, 58.9, 7.5, 4.6, 2.2, 1.6, M.cream, { y: 2.6, r: 0.2 });
   }
 
   // -------------------------------------------------------------------------
@@ -429,7 +507,7 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   }
 
   // -------------------------------------------------------------------------
-  // The M.2 HAT+ (its top face at this group's y = 0)
+  // The P33 HAT (its top face at this group's y = 0)
   // -------------------------------------------------------------------------
   const hat = new THREE.Group();
   root.add(hat);
@@ -437,33 +515,57 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   {
     const outline = rounded(0, 0, HAT.w, HAT.d, 3);
     for (const [x, z] of HOLES) outline.holes.push(circle(x, z, 1.4));
-    outline.holes.push(rounded(...HAT.window, 2.5, THREE.Path));
-    hat.add(board(outline, PCB, mask(paintHatTop(detail, drive)), mirrored(mask(paintHatBottom(detail * 0.5))), M.laminate));
+    for (const vent of HAT.vents) outline.holes.push(rounded(...vent, 2, THREE.Path));
+    const black = { roughness: 0.42, clearcoat: 0.4, bumpScale: 1.2 };
+    hat.add(board(outline, PCB, mask(paintHatTop(detail, drive), black), mirrored(mask(paintHatBottom(detail * 0.5), black)), M.darkLaminate));
 
     // M.2 socket, with the slot the drive's edge slides into.
     const s = HAT.socket;
     part(hat, s.x, s.z, s.w, s.d, 4.1, M.plastic, { r: 0.3, bevel: 0.12 });
     part(hat, s.x + s.w - 0.5, s.z + 0.5, 0.56, s.d - 1, 1.1, M.cream, { y: DRIVE_Y - 0.15, r: 0.1, bevel: 0.04 });
-    part(hat, s.x - 0.5, s.z - 0.7, 2.4, 1.1, 1.6, M.tin, { r: 0.15 });
-    part(hat, s.x - 0.5, s.z + s.d - 0.4, 2.4, 1.1, 1.6, M.tin, { r: 0.15 });
+    part(hat, s.x + 1.6, s.z - 0.7, 2.4, 1.1, 1.6, M.tin, { r: 0.15 });
+    part(hat, s.x + 1.6, s.z + s.d - 0.4, 2.4, 1.1, 1.6, M.tin, { r: 0.15 });
 
-    // Ribbon connector.
+    // Underneath: the ribbon's connector, and the socket that takes the
+    // Pi's four PoE pins.
     const f = HAT.ffc;
-    part(hat, f.x, f.z, 3, f.d, 2, M.cream, { r: 0.2 });
-    part(hat, f.x + 2.8, f.z + 0.4, 1.1, f.d - 0.8, 2.3, M.latch, { r: 0.2 });
+    part(hat, f.x, f.z, 3, f.d, 2, M.cream, { y: -PCB - 2, r: 0.2 });
+    part(hat, f.x - 0.5, f.z + 0.4, 1.1, f.d - 0.8, 2.3, M.latch, { y: -PCB - 2.3, r: 0.2 });
+    part(hat, HAT.poe[0][0] - 1.27, HAT.poe[0][1] - 1.27, 5.08, 5.08, 8.5, M.plastic, { y: -PCB - 8.5, r: 0.15 });
+    instances(hat, new THREE.BoxGeometry(0.5, 1.1, 0.5), M.tin, HAT.poe.map(([x, z]) => [x, 0.55, z]));
 
     // The 3.3 V supply for the drive, and a few passives round it.
     part(hat, 23.4, 8.1, 3, 3, 0.9, M.chip, { r: 0.12 });
     label(hat, decals.hatReg, 23.4, 8.1, 3, 3, 0.9);
     part(hat, 28, 7.9, 3.4, 3.4, 1.7, M.ferrite, { r: 0.45 });
     const caps = [];
-    for (const [x, z] of [[16, 8.4], [17.4, 8.4], [18.8, 8.4], [20.6, 9.6], [33, 8.4], [34.6, 8.4], [36.4, 9.4], [10.4, 38.4], [10.4, 46.4], [59, 20], [59, 22], [59, 30]]) caps.push([x + 0.5, 0.25, z + 0.25]);
+    for (const [x, z] of [[16, 8.4], [17.4, 8.4], [18.8, 8.4], [20.6, 9.6], [33, 8.4], [34.6, 8.4], [36.4, 9.4], [10.4, 38.4], [10.4, 46.4], [36, 46.2], [37.6, 46.2], [41.2, 39.4], [59.4, 49], [66, 51.4], [67.6, 51.4], [84.4, 42], [84.4, 44], [84.4, 50]]) caps.push([x + 0.5, 0.25, z + 0.25]);
     instances(hat, new THREE.BoxGeometry(1, 0.5, 0.5), M.ceramic, caps);
 
+    // The PoE supply. A transformer: a ferrite core, taped round the
+    // middle, on a base with a row of pins down each side.
+    const t = HAT.transformer;
+    part(hat, t.x, t.z, t.w, t.d, 1.4, M.plastic, { r: 0.3 });
+    part(hat, t.x + 0.6, t.z + 1.2, t.w - 1.2, t.d - 2.4, 6.2, M.ferrite, { y: 1.4, r: 0.5, bevel: 0.2 });
+    part(hat, t.x + 3.2, t.z + 1.05, t.w - 6.4, t.d - 2.1, 6.4, M.tape, { y: 1.3, r: 0.3, bevel: 0.1 });
+    const legs = [];
+    for (let i = 0; i < 6; i++) legs.push([t.x + 1.5 + i * 2, 0.35, t.z - 0.45], [t.x + 1.5 + i * 2, 0.35, t.z + t.d + 0.45]);
+    instances(hat, new THREE.BoxGeometry(0.6, 0.7, 1.1), M.tin, legs);
+    // The PoE controller, the output inductor, the two bridge rectifiers.
+    part(hat, 36, 39.6, 4.4, 4.4, 0.9, M.chip, { r: 0.15 });
+    part(hat, 67.5, 38, 5, 5, 3, M.ferrite, { r: 0.8, bevel: 0.2 });
+    part(hat, 77, 38.6, 4.6, 4, 1.5, M.chip, { r: 0.15 });
+    part(hat, 77, 45.4, 4.6, 4, 1.5, M.chip, { r: 0.15 });
+    // The bulk capacitor: an aluminium can in a dark sleeve.
+    const c = HAT.cap;
+    mesh(hat, new THREE.CylinderGeometry(c.r, c.r, 7.6, 32), M.sleeve, c.x, 3.8, c.z);
+    mesh(hat, new THREE.CylinderGeometry(c.r - 0.35, c.r - 0.35, 0.12, 32), M.can, c.x, 7.62, c.z);
+    part(hat, c.x - c.r - 0.3, c.z - c.r - 0.3, c.r * 2 + 0.6, c.r * 2 + 0.6, 0.5, M.plastic, { r: 0.8, bevel: 0.05 });
+
     // A post at each drive length; the drive's screw goes into one.
-    for (const size of ['2230', '2242']) {
+    for (const x of Object.values(HAT.posts)) {
       const post = new THREE.CylinderGeometry(1.75, 1.75, DRIVE_Y, 20);
-      mesh(hat, post, M.brass, HAT.posts[size], DRIVE_Y / 2, driveMid);
+      mesh(hat, post, M.brass, x, DRIVE_Y / 2, driveMid);
     }
 
     for (const [i, [x, z]] of HAT.leds.entries()) led(hat, x, 0.25, z, 0x3dff8a, i ? 'disk' : 'power', { w: 1, d: 0.5, halo: 6, spark: 2.6 });
@@ -488,20 +590,31 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
     outline.absarc(1.6, 16.6, 0.6, Math.PI / 2, -Math.PI / 2, true);
     outline.lineTo(0, 16);
     outline.closePath();
-    const top = mask(paintDrive(detail * 1.4, len), { roughness: 0.4, clearcoat: 0.5, bumpScale: 1 });
+    const top = mask(paintDrive(detail * (len > 42 ? 1 : 1.4), len), { roughness: 0.4, clearcoat: 0.5, bumpScale: 1 });
     const card = board(outline, 0.8, top, new THREE.MeshStandardMaterial({ color: 0x0c0d10, roughness: 0.45 }), M.darkLaminate);
     card.position.y = 0.8;
     ssd.add(card);
 
-    part(ssd, 4, 7.5, 7, 7, 0.9, M.chip, { y: 0.8, r: 0.15 });
-    label(ssd, decals.controller, 4, 7.5, 7, 7, 1.7);
-    part(ssd, 13, 3, 12, 16, 1, M.chip, { y: 0.8, r: 0.2 });
-    label(ssd, decals.sticker, 12.5, 2.5, 13, 17, 1.8, { roughness: 0.62 });
+    const caps = [[4.2, 3], [5.6, 3], [7, 3], [8.4, 4.4], [4.4, 19.6], [8.6, 19.8]];
     part(ssd, 5, 16, 2.4, 2.4, 0.7, M.chip, { y: 0.8, r: 0.1 });
-    if (len === 42) part(ssd, 27, 4, 11, 14, 1, M.chip, { y: 0.8, r: 0.2 });
-    const caps = [];
-    for (const [x, z] of [[4.2, 3], [5.6, 3], [7, 3], [8.4, 4.4], [9, 16.6], [10.4, 16.6], [4.4, 19.6], [8.6, 19.8]]) caps.push([x + 0.5, 1.05, z + 0.25]);
-    instances(ssd, new THREE.BoxGeometry(1, 0.5, 0.5), M.ceramic, caps);
+    if (decals.label) {
+      // The 2280: single-sided, the controller and two flash packages in a
+      // row, all under one long label.
+      part(ssd, 12, 7, 8, 8, 0.9, M.chip, { y: 0.8, r: 0.15 });
+      part(ssd, 26, 3, 12, 16, 1, M.chip, { y: 0.8, r: 0.2 });
+      part(ssd, 42, 3, 12, 16, 1, M.chip, { y: 0.8, r: 0.2 });
+      label(ssd, decals.label, 9.5, 2, 61, 18, 1.8, { roughness: 0.5 });
+      caps.push([58, 5], [59.6, 5], [58, 16.4], [72.4, 8], [72.4, 10], [72.4, 13.4], [74.4, 13.4]);
+    } else {
+      part(ssd, 4, 7.5, 7, 7, 0.9, M.chip, { y: 0.8, r: 0.15 });
+      label(ssd, decals.controller, 4, 7.5, 7, 7, 1.7);
+      part(ssd, 13, 3, 12, 16, 1, M.chip, { y: 0.8, r: 0.2 });
+      label(ssd, decals.sticker, 12.5, 2.5, 13, 17, 1.8, { roughness: 0.62 });
+      if (len >= 42) part(ssd, 27, 4, 11, 14, 1, M.chip, { y: 0.8, r: 0.2 });
+      if (len >= 60) part(ssd, 42, 4, 11, 14, 1, M.chip, { y: 0.8, r: 0.2 });
+      caps.push([9, 16.6], [10.4, 16.6]);
+    }
+    instances(ssd, new THREE.BoxGeometry(1, 0.5, 0.5), M.ceramic, caps.map(([x, z]) => [x + 0.5, 1.05, z + 0.25]));
 
     ssdScrew.add(screw(M.steel, M.plastic, len, 0.8, 11, { scale: 0.86, thread: 2.3 }));
   }
@@ -509,10 +622,12 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   ssdScrew.position.copy(ssd.position);
 
   // Where the annotations point.
-  const anchors = { ssd: new THREE.Object3D(), hat: new THREE.Object3D(), pi: new THREE.Object3D() };
-  anchors.ssd.position.set(len - 7, 1.9, 11);
+  const anchors = { ssd: new THREE.Object3D(), hat: new THREE.Object3D(), cooler: new THREE.Object3D(), pi: new THREE.Object3D() };
+  anchors.cooler.position.set(35.5, 9.4, 23);
+  cooler.add(anchors.cooler);
+  anchors.ssd.position.set(Math.min(len - 7, 36), 1.9, 11);
   ssd.add(anchors.ssd);
-  anchors.hat.position.set(60.5, 0, 30);
+  anchors.hat.position.set(HAT.transformer.x + 6.5, 7.7, HAT.transformer.z + 5.5);
   hat.add(anchors.hat);
   anchors.pi.position.set(31, 1.9, 27);
   pi.add(anchors.pi);
@@ -524,10 +639,12 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
    * Takes the stack apart.
    *   open    0 assembled .. 1 every layer floating above the one below
    *   lift    0..1, raises the SSD further out of its slot
-   *   clear   0..1, carries everything above the Pi up and out of the way
+   *   clear   0..1, carries the HAT and what holds it up and out of the way
+   *   bare    0..1, carries the cooler off after them, leaving the Pi alone
    */
-  function pose(open, lift = 0, clear = 0) {
+  function pose(open, lift = 0, clear = 0, bare = 0) {
     const away = ease(clear) * 150;
+    cooler.position.y = span(open, 0.4, 1) * 6 + ease(clear) * 8 + ease(bare) * 150;
     screwsTop.position.y = HAT_TOP + span(open, 0, 0.55) * 46 + away * 1.15;
     ssdScrew.position.y = DRIVE_Y + span(open, 0.05, 0.6) * 24 + lift * 8;
     ssd.position.y = DRIVE_Y + span(open, 0.12, 0.75) * 13 + lift * 7;
@@ -538,8 +655,10 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
   }
   pose(0);
 
-  /** Runs the LEDs. power 0..1 fades them all up, for the switch-on. */
-  function tick(time, power = 1) {
+  /** Runs the LEDs and the fan. power 0..1 fades the LEDs up, for the
+   *  switch-on; still holds the fan where it is. */
+  function tick(time, power = 1, still = false) {
+    if (!still) spin.rotation.y = -time * 9;
     for (const l of leds) {
       let k = 1;
       const beat = (rate) => noise(Math.floor(time * rate) + l.seed);
@@ -553,7 +672,7 @@ export function buildStack(renderer, { drive = '2230', detail = 24 } = {}) {
     }
   }
 
-  return { root, anchors, pose, tick, layers: { pi, hat, ssd } };
+  return { root, anchors, pose, tick, layers: { pi, cooler, hat, ssd } };
 }
 
 function noise(n) {
@@ -586,9 +705,10 @@ function screw(steel, dark, x, y, z, { scale = 1, thread: length = 4.6 } = {}) {
 }
 
 /** The PCIe ribbon: a strip following a C-shaped path from the Pi's
- *  connector up to where the HAT's sits when the stack is assembled. */
+ *  connector up to where the HAT's sits, under the board, when the stack
+ *  is assembled. */
 function ribbon(texture) {
-  const top = HAT_TOP + 1;
+  const top = GAP - 1;
   const path = new THREE.CurvePath();
   path.add(new THREE.LineCurve(new THREE.Vector2(3.2, 1), new THREE.Vector2(0.4, 1)));
   path.add(new THREE.CubicBezierCurve(new THREE.Vector2(0.4, 1), new THREE.Vector2(-7, 1), new THREE.Vector2(-7, top), new THREE.Vector2(0.4, top)));
