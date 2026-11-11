@@ -415,6 +415,7 @@ a.unit:hover .unit__state { color: var(--text-2); }
 .term__log .cmd:first-child { margin-top: 0; }
 .term__out { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text-2); font: inherit; }
 .term__out a { color: var(--up); }
+.term__ls { display: grid; grid-template-columns: max-content 1fr; gap: 0 2ch; white-space: normal; }
 .term__out .dim { color: var(--faint); }
 .term__out .ok { color: var(--up); }
 .term__out .err { color: #ff8f8f; }
