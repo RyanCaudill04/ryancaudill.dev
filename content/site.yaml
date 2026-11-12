@@ -96,7 +96,7 @@ projects:
     url: https://admin.ryancaudill.dev
     description: Runs the Minecraft server; sign-in required
 
-# Past projects, shown under `ls ~/archive`. Empty hides the section.
+# Past projects, hidden until `ls --archive` is typed in the shell. Empty hides it entirely.
 archive:
   - name: gradingagent
     description: Automated grader for CSCE 247 Java assignments; Django frontend, FastAPI backend, PostgreSQL and Gemini-based code review

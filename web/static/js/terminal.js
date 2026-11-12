@@ -7,7 +7,7 @@
 
 const HELP = [
   ['help', 'this list'],
-  ['ls [archive]', 'the projects, or the past ones'],
+  ['ls [--archive]', 'the projects, or the past ones'],
   ['systemctl status <unit>', 'one project in detail'],
   ['open <unit>', 'go to a project'],
   ['whoami', 'the short version'],
@@ -69,9 +69,10 @@ export function startTerminal(root, { stage } = {}) {
   const commands = {
     help: () => HELP.map(([c, what]) => [el('span', 'hi', pad(c, 28)), el('span', 'dim', what)]),
     ls: (arg = '') => {
-      const list = /archive/.test(arg) ? past : arg && !/^(~|\.|projects)\/?$/.test(arg) ? null : units;
+      const list = arg === '--archive' ? past : arg && !/^(~|\.|projects)\/?$/.test(arg) ? null : units;
       if (!list) return [el('span', 'err', `ls: cannot access '${arg}': No such file or directory`)];
-      return list.map((u) => [u.url ? link(u.url, pad(u.id, 16)) : pad(u.id, 16), el('span', 'dim', u.desc)]);
+      // One grid, so a long description wraps under itself, not under the name.
+      return [[el('div', 'term__ls', ...list.flatMap((u) => [u.url ? link(u.url, u.id) : el('span', {}, u.id), el('span', 'dim', u.desc)]))]];
     },
     systemctl: (verb, id) => {
       if (verb === 'list-units') return units.map((u) => [el('span', 'ok', '● '), pad(u.id, 16), el('span', 'dim', 'active (running)')]);
@@ -163,7 +164,7 @@ export function startTerminal(root, { stage } = {}) {
     const last = words[words.length - 1];
     let pool = Object.keys(commands);
     if (words.length > 1) {
-      pool = { systemctl: words.length === 2 ? ['status', 'list-units'] : units.map((u) => u.id), open: [...units, ...past].filter((u) => u.url).map((u) => u.id), cat: ['about', 'resume'], ls: ['archive'] }[words[0]] || [];
+      pool = { systemctl: words.length === 2 ? ['status', 'list-units'] : units.map((u) => u.id), open: [...units, ...past].filter((u) => u.url).map((u) => u.id), cat: ['about', 'resume'], ls: ['--archive'] }[words[0]] || [];
     }
     const hits = pool.filter((p) => p.startsWith(last) && p !== last);
     return hits.length === 1 ? hits[0].slice(last.length) : '';

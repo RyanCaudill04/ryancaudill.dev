@@ -154,7 +154,8 @@
         </ul>
 
         {{- if .Site.Archive}}
-        <p class="cmd"><span>$</span> ls ~/archive</p>
+        {{- /* Hidden: terminal.js reads these rows and prints them on `ls --archive`. */}}
+        <div hidden>
         <ul class="units">
           {{- range .Site.Archive}}
           <li>
@@ -168,6 +169,7 @@
           </li>
           {{- end}}
         </ul>
+        </div>
         {{- end}}
 
         <div class="term__log" data-term-log role="log" aria-label="Command output"></div>
