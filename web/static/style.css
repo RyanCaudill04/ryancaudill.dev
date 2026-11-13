@@ -46,7 +46,15 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: var(--top); scrollbar-color: #2b3036 var(--bg); }
+html { scroll-behavior: smooth; scrollbar-color: #2b3036 var(--bg); }
+/* Anchored sections stop short of the fixed header. (Set per section, not on
+   html, so the offset isn't counted twice.) */
+section[id] { scroll-margin-top: var(--top); }
+
+/* Navigating between pages (home <-> 404) cross-fades instead of cutting.
+   Progressive enhancement: browsers without support just navigate. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.18s; }
 body {
   margin: 0;
   background: var(--bg);
@@ -101,10 +109,15 @@ button { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: 4px;
   padding: 8px 12px; border-radius: 999px;
   color: var(--muted); text-decoration: none; font-size: 14px;
-  transition: color 0.2s, background-color 0.2s;
+  transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
 .top nav a:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
-.top nav a[aria-current] { color: var(--text); }
+.top nav a:focus-visible { border-radius: 999px; outline-offset: 2px; }
+.top nav a[aria-current] { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+/* Touch: a bigger target without making the bar any taller. */
+@media (pointer: coarse) {
+  .top nav a { min-height: 44px; padding-block: 0; }
+}
 .top nav .icon { font-size: 13px; opacity: 0.7; }
 @media (max-width: 700px) {
   .top nav .nav--wide { display: none; }
@@ -141,9 +154,10 @@ button { font: inherit; color: inherit; }
   border: 1px solid #353a41; border-radius: 999px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--text); font-weight: 500; font-size: 15px; text-decoration: none; white-space: nowrap;
-  transition: border-color 0.25s, background-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s;
+  transition: color 0.16s var(--ease), border-color 0.16s var(--ease), background-color 0.16s var(--ease), transform 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
-.btn .icon { transition: transform 0.25s var(--ease); }
+.btn .icon { transition: transform 0.16s var(--ease); }
+.btn:focus-visible { border-radius: 999px; outline-offset: 4px; }
 .btn:hover { color: var(--text); border-color: var(--muted); transform: translateY(-1px); }
 .btn:hover .icon { transform: translateY(2px); }
 .btn:active { transform: translateY(0); }
@@ -376,10 +390,12 @@ button { font: inherit; color: inherit; }
   gap: 12px; align-items: center;
   min-height: 46px; padding: 8px 12px; border-radius: 8px;
   color: var(--text); text-decoration: none;
-  transition: background-color 0.2s;
+  transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
 }
+.unit:focus-visible { outline-offset: -2px; border-radius: 8px; }
 a.unit:hover { background: var(--panel-hi); color: var(--text); }
 a.unit:hover .unit__state { color: var(--text-2); }
+.unit__state { transition: color 0.16s var(--ease); }
 .unit__host { color: var(--up); }
 .unit__desc, .unit__state { color: var(--muted); }
 .unit__state { text-align: right; }
@@ -497,6 +513,31 @@ a.unit:hover .unit__state { color: var(--text-2); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
   html { scroll-behavior: auto; }
+  @view-transition { navigation: none; }
+}
+
+/* Progressive enhancement: sections ease in as they reach the screen, driven
+   by scroll position. Only opacity and transform; off under reduced motion. */
+@keyframes section-in { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
+@keyframes section-fade { from { opacity: 0; } to { opacity: 1; } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The slide goes on the section's inner wrapper, not the section: a
+       transform on the anchor target itself would shift where #projects and
+       #resume land under the header. */
+    .projects > .wrap, .resume > .wrap {
+      animation: section-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    /* The about text has its own word-by-word reveal and the teardown is
+       pinned with sticky, so those two only fade. */
+    .about, .teardown {
+      animation: section-fade linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
 }
 
 /* ---------- Narrow screens: one column, the Pi between the name and the text ---------- */
