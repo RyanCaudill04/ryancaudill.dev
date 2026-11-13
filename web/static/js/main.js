@@ -87,12 +87,10 @@ const lead = $('[data-words]');
 let words = [];
 if (lead && !still) {
   const text = lead.textContent;
-  lead.setAttribute('aria-label', text);
   lead.replaceChildren(...text.split(/(\s+)/).map((piece) => {
     if (!piece.trim()) return piece;
     const span = document.createElement('span');
     span.className = 'w';
-    span.setAttribute('aria-hidden', 'true');
     span.textContent = piece;
     return span;
   }));

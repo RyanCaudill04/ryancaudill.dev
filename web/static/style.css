@@ -28,7 +28,7 @@
   --text: #f0efe9;
   --text-2: #c9cbc5;
   --muted: #a0a59e;
-  --faint: #7f847e;
+  --faint: #8a8f88; /* AA (4.5:1) on every surface it sits on: 5.0:1 at worst, on the hovered row/panel-hi button */
 
   /* Two accents with one job each: green is anything live or clickable,
      raspberry is an annotation pointing at something. */
@@ -273,7 +273,7 @@ button { font: inherit; color: inherit; }
   font: 400 clamp(26px, 2.5vw, 36px)/1.22 var(--serif); letter-spacing: -0.005em;
   text-wrap: pretty;
 }
-.lead-text .w { color: rgba(240, 239, 233, 0.24); transition: color 0.5s; }
+.lead-text .w { color: rgba(240, 239, 233, 0.4); /* 3.4:1 on --bg: passes AA for this large type */ transition: color 0.5s; }
 .lead-text .w.on { color: var(--text); }
 .body-text { margin-top: 28px; max-width: 34em; font-size: 17px; line-height: 1.7; color: var(--muted); }
 .more {
@@ -369,10 +369,10 @@ button { font: inherit; color: inherit; }
 .cmd:first-child { margin-top: 0; }
 .cmd > span:first-child, .cmd > label > span:first-child { color: var(--up); }
 
-.units { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
+.units { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .unit {
   display: grid;
-  grid-template-columns: 24px 160px 230px minmax(220px, 1fr) 150px;
+  grid-template-columns: 24px minmax(110px, 160px) minmax(120px, 230px) minmax(160px, 1fr) minmax(90px, 150px);
   gap: 12px; align-items: center;
   min-height: 46px; padding: 8px 12px; border-radius: 8px;
   color: var(--text); text-decoration: none;
