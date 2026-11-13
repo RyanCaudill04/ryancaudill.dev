@@ -72,7 +72,11 @@ const sections = links.map((a) => $(a.getAttribute('href'))).filter(Boolean);
 if (sections.length) {
   const seen = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      if (!entry.isIntersecting) continue;
+      // Leaving a section clears its link too, so the hero (or a gap) shows none lit.
+      if (!entry.isIntersecting) {
+        for (const a of links) if (a.getAttribute('href') === `#${entry.target.id}`) a.removeAttribute('aria-current');
+        continue;
+      }
       for (const a of links) {
         if (a.getAttribute('href') === `#${entry.target.id}`) a.setAttribute('aria-current', 'true');
         else a.removeAttribute('aria-current');
