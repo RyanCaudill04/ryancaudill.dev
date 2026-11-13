@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"image/png"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -49,7 +54,84 @@ func TestBuild(t *testing.T) {
 		t.Error("robots.txt has no User-agent line")
 	}
 	read("static/style.css")
-	read("static/favicon.ico")
+	read("favicon.ico")
+}
+
+// TestIcons checks the tab icon setup is complete: every icon, manifest and
+// manifest icon the pages reference is in the build, the apple-touch-icon
+// and manifest links are on both pages, favicon.ico holds 16/32/48 frames,
+// and the Content-Security-Policy lets the manifest load.
+func TestIcons(t *testing.T) {
+	out := t.TempDir()
+	if err := build(os.DirFS("."), out, "test"); err != nil {
+		t.Fatal(err)
+	}
+	read := func(name string) []byte {
+		t.Helper()
+		data, err := os.ReadFile(filepath.Join(out, filepath.FromSlash(name)))
+		if err != nil {
+			t.Fatalf("%s isn't in the build: %v", name, err)
+		}
+		return data
+	}
+
+	link := regexp.MustCompile(`<link rel="(icon|apple-touch-icon|manifest)" href="(/[^"]+)"`)
+	for _, page := range []string{"index.html", "404.html"} {
+		seen := map[string]bool{}
+		for _, m := range link.FindAllStringSubmatch(string(read(page)), -1) {
+			seen[m[1]] = true
+			read(strings.TrimPrefix(m[2], "/"))
+		}
+		for _, rel := range []string{"icon", "apple-touch-icon", "manifest"} {
+			if !seen[rel] {
+				t.Errorf("%s has no <link rel=%q>", page, rel)
+			}
+		}
+		if !strings.Contains(string(read(page)), `<meta name="theme-color"`) {
+			t.Errorf("%s has no theme-color meta", page)
+		}
+	}
+
+	// favicon.ico: 16, 32 and 48px frames.
+	ico := read("favicon.ico")
+	if len(ico) < 6 || ico[2] != 1 || ico[3] != 0 {
+		t.Fatal("favicon.ico isn't an icon file")
+	}
+	var sizes []int
+	for i := 0; i < int(ico[4]); i++ {
+		sizes = append(sizes, int(ico[6+16*i]))
+	}
+	if !slices.Equal(sizes, []int{16, 32, 48}) {
+		t.Errorf("favicon.ico has frames %v, want [16 32 48]", sizes)
+	}
+
+	// Every icon in the manifest exists and has the size it claims.
+	var manifest struct {
+		Icons []struct{ Src, Sizes string }
+	}
+	if err := json.Unmarshal(read("static/site.webmanifest"), &manifest); err != nil {
+		t.Fatalf("site.webmanifest: %v", err)
+	}
+	have := map[string]bool{}
+	for _, ic := range manifest.Icons {
+		cfg, err := png.DecodeConfig(bytes.NewReader(read(strings.TrimPrefix(ic.Src, "/"))))
+		if err != nil {
+			t.Fatalf("%s: %v", ic.Src, err)
+		}
+		if got := fmt.Sprintf("%dx%d", cfg.Width, cfg.Height); got != ic.Sizes {
+			t.Errorf("%s is %s, manifest says %s", ic.Src, got, ic.Sizes)
+		}
+		have[ic.Sizes] = true
+	}
+	for _, size := range []string{"192x192", "512x512"} {
+		if !have[size] {
+			t.Errorf("site.webmanifest has no %s icon", size)
+		}
+	}
+
+	if !strings.Contains(string(read("_headers")), "manifest-src 'self'") {
+		t.Error("_headers: the Content-Security-Policy has no manifest-src, so the manifest is blocked")
+	}
 }
 
 // TestBuildLinks checks that everything the pages load is in the build:

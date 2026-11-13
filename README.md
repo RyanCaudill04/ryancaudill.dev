@@ -84,7 +84,7 @@ npx esbuild node_modules/three/build/three.module.js --bundle --minify --format=
 
 `web/static/og.jpg`, the picture link previews show, is a 1200 × 630 screenshot of the top of the page. Retake it if the hero changes.
 
-`web/static/ryan.jpg` is the portrait in the header and About section (set by `photo:` in `content/site.yaml`; remove that line to hide it). The tab icons (`favicon.ico`, `icon-192.png`, `apple-touch-icon.png`) are crops of the same photo: the first two with transparent circular corners, the Apple one square because iOS rounds it itself.
+`web/static/ryan.jpg` is the portrait in the header and About section (set by `photo:` in `content/site.yaml`; remove that line to hide it). The tab icons (`web/favicon.ico` with 16/32/48 frames, served at `/favicon.ico`; `favicon-16x16.png`, `favicon-32x32.png`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`) are tight face crops of the same photo, with extra contrast and sharpening at 16 and 32px so they stay readable in a tab. All but the Apple one have transparent circular corners; the Apple one is square because iOS rounds it itself.
 
 ## Layout
 
@@ -95,7 +95,8 @@ internal/content/   loads and checks content/site.yaml (+ test)
 content/site.yaml   all the page's text
 web/templates/      index.html (the page), 404.html, partials.html (shared pieces),
                     pi.html (the Pi drawing, shown when the 3D model can't run)
-web/static/         style.css, favicon and icons, ryan.jpg, resume.pdf, og.jpg
+web/favicon.ico     the tab icon, served at /favicon.ico
+web/static/         style.css, icons, site.webmanifest, ryan.jpg, resume.pdf, og.jpg
 web/static/js/      main.js      the page: header, scroll effects, starts the rest
                     scene.js     the 3D stage: camera, lighting, scroll and drag
                     model.js     the Pi, cooler, HAT and SSD, part by part
