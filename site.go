@@ -23,8 +23,9 @@ const contentPath = "content/site.yaml"
 var pages = []string{"index.html", "404.html"}
 
 // Files in web/ copied as-is to the root of the output folder: response
-// headers for Cloudflare Pages, and the crawler rules at /robots.txt.
-var rootFiles = []string{"_headers", "robots.txt"}
+// headers for Cloudflare Pages, the crawler rules at /robots.txt, and the
+// tab icon at /favicon.ico (browsers ask for it there even with no <link>).
+var rootFiles = []string{"_headers", "robots.txt", "favicon.ico"}
 
 // funcs are the helpers the templates can call.
 var funcs = template.FuncMap{
@@ -67,7 +68,8 @@ func (s *site) render(name, version string) ([]byte, error) {
 // build writes the whole site into out, replacing what was there:
 //
 //	index.html, 404.html   the rendered pages
-//	_headers, robots.txt   copied from web/
+//	_headers, robots.txt,  copied from web/
+//	favicon.ico
 //	static/                everything in web/static
 func build(files fs.FS, out, version string) error {
 	if clean := filepath.Clean(out); clean == "." || clean == "/" {
@@ -178,6 +180,10 @@ func serve(addr string, files fs.FS) error {
 	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		http.ServeFileFS(w, r, files, "web/robots.txt")
+	})
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		http.ServeFileFS(w, r, files, "web/favicon.ico")
 	})
 	mux.HandleFunc("/", page("404.html", http.StatusNotFound))
 
