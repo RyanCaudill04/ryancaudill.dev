@@ -126,6 +126,15 @@ if (!still && 'IntersectionObserver' in window) {
   $$('[data-reveal]').forEach((n) => reveal.observe(n));
 }
 
+// --- Pause the fallback board's LEDs when it's off-screen or the tab is hidden
+const piArt = $('.pi-wrap');
+if (piArt && 'IntersectionObserver' in window) {
+  let onScreen = true;
+  const sync = () => piArt.classList.toggle('is-paused', !onScreen || document.hidden);
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; sync(); }).observe(piArt);
+  document.addEventListener('visibilitychange', sync);
+}
+
 // --- Footer clock ------------------------------------------------------------
 const clock = $('[data-clock]');
 if (clock) {

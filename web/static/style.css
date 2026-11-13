@@ -266,7 +266,10 @@ button { font: inherit; color: inherit; }
 .no-3d .slot__art, .no-js .slot__art {
   background: radial-gradient(ellipse at 50% 50%, rgba(61, 220, 132, 0.13), rgba(9, 10, 11, 0) 68%);
 }
-.pi { display: block; width: 100%; max-width: 620px; height: auto; overflow: visible; }
+.pi-wrap { position: relative; width: 100%; max-width: 620px; }
+.pi { display: block; width: 100%; height: auto; overflow: visible; }
+/* The art box is static paint, so keep its repaints (and the drop shadow) inside it. */
+.slot__art:has(.pi-wrap) { contain: paint; }
 .slot figcaption {
   display: flex; flex-wrap: wrap; gap: 4px 20px; justify-content: center;
   font: 12px var(--mono); color: var(--faint); text-align: center;
@@ -298,8 +301,18 @@ button { font: inherit; color: inherit; }
 .more:hover .icon { transform: translateY(3px); }
 
 /* LEDs inside the fallback illustration */
-.pi .blink { animation: blink 2.2s ease-in-out infinite; }
-.pi .flicker { animation: flicker 1.4s steps(1) infinite; }
+/* Each animated light is its own small SVG laid over the board (its box in the
+   95 x 65 drawing, as percentages), so animating opacity promotes just that box
+   to a compositor layer and never repaints the board. */
+.pi-led { position: absolute; overflow: visible; pointer-events: none; width: 6.316%; height: 9.231%; will-change: opacity; }
+.pi-led--act { left: 92.211%; top: 60.615%; }
+.pi-led--amber { left: 92.211%; top: 80.462%; }
+.pi-led--pwr { left: 6.105%; top: 72.231%; }
+.pi-led.blink { animation: blink 2.2s ease-in-out infinite; }
+.pi-led.flicker { animation: flicker 1.4s steps(1) infinite; }
+/* Paused when the board is off-screen or the tab is hidden (main.js), and
+   while the 3D model is covering it. */
+.pi-wrap.is-paused .pi-led, .has-3d .pi-led { animation-play-state: paused; }
 
 /* ---------- Hardware: the teardown ----------
    With the 3D model (.has-3d, set by main.js before the scene loads) the
