@@ -3,6 +3,7 @@
 // reads fine without any of it.
 
 import { startTerminal } from './terminal.js';
+import { startStatus } from './status.js';
 
 const root = document.documentElement;
 const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -72,7 +73,11 @@ const sections = links.map((a) => $(a.getAttribute('href'))).filter(Boolean);
 if (sections.length) {
   const seen = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      if (!entry.isIntersecting) continue;
+      // Leaving a section clears its link too, so the hero (or a gap) shows none lit.
+      if (!entry.isIntersecting) {
+        for (const a of links) if (a.getAttribute('href') === `#${entry.target.id}`) a.removeAttribute('aria-current');
+        continue;
+      }
       for (const a of links) {
         if (a.getAttribute('href') === `#${entry.target.id}`) a.setAttribute('aria-current', 'true');
         else a.removeAttribute('aria-current');
@@ -122,6 +127,15 @@ if (!still && 'IntersectionObserver' in window) {
   $$('[data-reveal]').forEach((n) => reveal.observe(n));
 }
 
+// --- Pause the fallback board's LEDs when it's off-screen or the tab is hidden
+const piSvg = $('.pi');
+if (piSvg && 'IntersectionObserver' in window) {
+  let onScreen = true;
+  const sync = () => piSvg.classList.toggle('is-paused', !onScreen || document.hidden);
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; sync(); }).observe(piSvg);
+  document.addEventListener('visibilitychange', sync);
+}
+
 // --- Footer clock ------------------------------------------------------------
 const clock = $('[data-clock]');
 if (clock) {
@@ -137,6 +151,9 @@ if (clock) {
 
 // --- Terminal ----------------------------------------------------------------
 const terminal = $('[data-terminal]');
-if (terminal) startTerminal(terminal, { stage: () => stage });
+if (terminal) {
+  startStatus(terminal);
+  startTerminal(terminal, { stage: () => stage });
+}
 
 onScroll();

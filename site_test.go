@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path"
 	"path/filepath"
@@ -50,6 +51,21 @@ func TestBuild(t *testing.T) {
 	}
 	read("static/style.css")
 	read("static/favicon.ico")
+	read("favicon.ico")
+
+	// The status function reads this to know what to check.
+	var targets []struct{ ID, URL, StateField string }
+	if err := json.Unmarshal([]byte(read("status-targets.json")), &targets); err != nil {
+		t.Fatalf("status-targets.json: %v", err)
+	}
+	if len(targets) != len(st.content.Projects) {
+		t.Errorf("status-targets.json has %d targets, want one per project (%d)", len(targets), len(st.content.Projects))
+	}
+	for _, p := range st.content.Projects {
+		if p.Health != "" && !strings.HasPrefix(p.Health, "https://") {
+			t.Errorf("project %q: health %q should be a public https URL", p.ID, p.Health)
+		}
+	}
 }
 
 // TestBuildLinks checks that everything the pages load is in the build:

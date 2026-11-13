@@ -51,6 +51,8 @@ type Project struct {
 	Host        string `yaml:"host"` // e.g. play.ryancaudill.dev
 	URL         string `yaml:"url"`  // link target; empty when it isn't a web page
 	Description string `yaml:"description"`
+	Health      string `yaml:"health"`      // a URL the status function checks for the light; empty: not monitored
+	StateField  string `yaml:"state_field"` // JSON field in the health answer holding the state; empty: any 2xx is up
 }
 
 // Past is a project that no longer runs.

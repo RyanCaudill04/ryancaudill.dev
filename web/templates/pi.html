@@ -12,8 +12,9 @@
 <linearGradient id="cream" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1ead6"></stop><stop offset="1" stop-color="#d6cdb3"></stop></linearGradient>
 <pattern id="pins" x="7.1" y="1" width="2.54" height="2.54" patternUnits="userSpaceOnUse"><rect width="2.54" height="2.54" fill="#121314"></rect><rect x="0.18" y="0.18" width="2.18" height="2.18" fill="#1e2022" stroke="#070707" stroke-width="0.08"></rect><rect x="0.94" y="0.94" width="0.66" height="0.66" fill="url(#gold)"></rect><rect x="0.94" y="0.94" width="0.28" height="0.28" fill="#fff6d6" opacity="0.75"></rect></pattern>
 <filter id="shadow" x="-10%" y="-10%" width="125%" height="135%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#000000" flood-opacity="0.6"></feDropShadow></filter>
-<filter id="soft" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0.1" dy="0.3" stdDeviation="0.22" flood-color="#000000" flood-opacity="0.55"></feDropShadow></filter>
-<filter id="glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="0.55"></feGaussianBlur></filter>
+<radialGradient id="glow-g"><stop offset="0.35" stop-color="#3ddc84" stop-opacity="1"></stop><stop offset="1" stop-color="#3ddc84" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="glow-a"><stop offset="0.35" stop-color="#f5b94a" stop-opacity="1"></stop><stop offset="1" stop-color="#f5b94a" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="glow-r"><stop offset="0.35" stop-color="#ff4d4d" stop-opacity="1"></stop><stop offset="1" stop-color="#ff4d4d" stop-opacity="0"></stop></radialGradient>
 <g id="hole"><circle r="3" fill="url(#gold)"></circle><circle r="2.45" fill="#c69c48"></circle><circle r="1.35" fill="#0d0f12"></circle></g>
 <g id="via"><circle r="0.24" fill="#4fb57c"></circle><circle r="0.1" fill="#0e3a22"></circle></g>
 <g id="cap"><rect width="1" height="0.5" fill="#c9a77c"></rect><rect width="0.22" height="0.5" fill="#dfe3e7"></rect><rect x="0.78" width="0.22" height="0.5" fill="#dfe3e7"></rect></g>
@@ -54,40 +55,40 @@
 </g>
 <path d="M1.5 9.1H5.6V10.1H1.8V11.1H5.6V12.1H1.8V13.1H5.6V14.1" fill="none" stroke="#6fd39b" stroke-opacity="0.55" stroke-width="0.26"></path>
 
-<rect x="7.1" y="1" width="50.8" height="5.08" fill="url(#pins)" filter="url(#soft)"></rect>
+<rect x="7.05" y="1.1" width="51.1" height="5.38" rx="0" fill="#000" fill-opacity="0.4"></rect><rect x="7.1" y="1" width="50.8" height="5.08" fill="url(#pins)"></rect>
 <rect x="7.1" y="1" width="50.8" height="5.08" fill="none" stroke="#000000" stroke-width="0.1"></rect>
 
-<rect x="8" y="8.5" width="12" height="8.5" rx="0.5" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="7.95" y="8.6" width="12.3" height="8.8" rx="0.5" fill="#000" fill-opacity="0.4"></rect><rect x="8" y="8.5" width="12" height="8.5" rx="0.5" fill="url(#metal)"></rect>
 <rect x="8.7" y="9.2" width="10.6" height="7.1" rx="0.35" fill="none" stroke="#9aa1a9" stroke-width="0.14"></rect>
 <use href="#berry" transform="translate(14 12.8) scale(0.9)" fill="#a7aeb5"></use>
 
-<rect x="12" y="18.5" width="9" height="14" rx="0.4" fill="url(#chip)" filter="url(#soft)"></rect>
+<rect x="11.95" y="18.6" width="9.3" height="14.3" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="12" y="18.5" width="9" height="14" rx="0.4" fill="url(#chip)"></rect>
 <circle cx="13" cy="19.5" r="0.35" fill="#3c4046"></circle>
 <text transform="translate(15.9 25.5) rotate(-90)" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="1.05" fill="#7e858e">MICRON</text>
 <text transform="translate(17.4 25.5) rotate(-90)" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.9" fill="#6c737c">LPDDR4X</text>
 
-<rect x="22.5" y="18.5" width="17" height="17" rx="0.7" fill="#1e3b2b" filter="url(#soft)"></rect>
+<rect x="22.45" y="18.6" width="17.3" height="17.3" rx="0.7" fill="#000" fill-opacity="0.4"></rect><rect x="22.5" y="18.5" width="17" height="17" rx="0.7" fill="#1e3b2b"></rect>
 <rect x="23.3" y="19.3" width="15.4" height="15.4" rx="1" fill="url(#lid)"></rect>
 <rect x="23.3" y="19.3" width="15.4" height="15.4" rx="1" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="0.12"></rect>
 <use href="#berry" transform="translate(31 24.6) scale(1.6)" fill="#9aa1a9"></use>
 <text x="31" y="30.2" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="1" fill="#737a83">BCM2712ZPKFSB00C0T</text>
 <text x="31" y="31.7" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.85" fill="#858c94">© 2023 BROADCOM</text>
 
-<rect x="41" y="20.8" width="2.6" height="1.6" rx="0.7" fill="url(#metalH)" filter="url(#soft)"></rect>
+<rect x="40.95" y="20.9" width="2.9" height="1.9" rx="0.7" fill="#000" fill-opacity="0.4"></rect><rect x="41" y="20.8" width="2.6" height="1.6" rx="0.7" fill="url(#metalH)"></rect>
 
-<rect x="51" y="24" width="8.5" height="8.5" rx="0.3" fill="url(#chip)" filter="url(#soft)"></rect>
+<rect x="50.95" y="24.1" width="8.8" height="8.8" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="51" y="24" width="8.5" height="8.5" rx="0.3" fill="url(#chip)"></rect>
 <use href="#berry" transform="translate(55.25 27) scale(0.95)" fill="#e9ecef"></use>
 <text x="55.25" y="30.6" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.95" font-weight="700" fill="#cfd3d8">RP1-C0</text>
 <text x="55.25" y="31.8" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.62" fill="#8a9099">© 2020-23 RPL</text>
 
-<rect x="58.5" y="12.5" width="4.5" height="4.5" rx="0.2" fill="url(#chip)" filter="url(#soft)"></rect>
+<rect x="58.45" y="12.6" width="4.8" height="4.8" rx="0.2" fill="#000" fill-opacity="0.4"></rect><rect x="58.5" y="12.5" width="4.5" height="4.5" rx="0.2" fill="url(#chip)"></rect>
 <text x="60.75" y="15" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.5" fill="#8a9099">BCM54213</text>
 
-<rect x="11" y="39.5" width="5.5" height="5.5" rx="0.25" fill="url(#chip)" filter="url(#soft)"></rect>
+<rect x="10.95" y="39.6" width="5.8" height="5.8" rx="0.25" fill="#000" fill-opacity="0.4"></rect><rect x="11" y="39.5" width="5.5" height="5.5" rx="0.25" fill="url(#chip)"></rect>
 <text x="13.75" y="42.6" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="0.72" fill="#8a9099">DA9091</text>
-<rect x="17.5" y="39.8" width="3" height="3" rx="0.3" fill="#5f646b" filter="url(#soft)"></rect><rect x="18.1" y="40.4" width="1.8" height="1.8" rx="0.2" fill="#44484e"></rect>
-<rect x="17.5" y="43.8" width="3" height="3" rx="0.3" fill="#5f646b" filter="url(#soft)"></rect><rect x="18.1" y="44.4" width="1.8" height="1.8" rx="0.2" fill="#44484e"></rect>
-<rect x="21" y="44.6" width="2.4" height="2.4" rx="0.3" fill="#5f646b" filter="url(#soft)"></rect><rect x="21.5" y="45.1" width="1.4" height="1.4" rx="0.2" fill="#44484e"></rect>
+<rect x="17.45" y="39.9" width="3.3" height="3.3" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="17.5" y="39.8" width="3" height="3" rx="0.3" fill="#5f646b"></rect><rect x="18.1" y="40.4" width="1.8" height="1.8" rx="0.2" fill="#44484e"></rect>
+<rect x="17.45" y="43.9" width="3.3" height="3.3" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="17.5" y="43.8" width="3" height="3" rx="0.3" fill="#5f646b"></rect><rect x="18.1" y="44.4" width="1.8" height="1.8" rx="0.2" fill="#44484e"></rect>
+<rect x="20.95" y="44.7" width="2.7" height="2.7" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="21" y="44.6" width="2.4" height="2.4" rx="0.3" fill="#5f646b"></rect><rect x="21.5" y="45.1" width="1.4" height="1.4" rx="0.2" fill="#44484e"></rect>
 
 <use href="#cap" x="24" y="17.4"></use><use href="#cap" x="25.6" y="17.4"></use><use href="#cap" x="27.2" y="17.4"></use><use href="#cap" x="28.8" y="17.4"></use><use href="#res" x="30.4" y="17.4"></use><use href="#cap" x="32" y="17.4"></use><use href="#cap" x="33.6" y="17.4"></use><use href="#cap" x="35.2" y="17.4"></use><use href="#cap" x="36.8" y="17.4"></use>
 <use href="#cap" x="24.2" y="36.1"></use><use href="#cap" x="25.6" y="36.1"></use><use href="#cap" x="29.6" y="36.1"></use><use href="#res" x="31" y="36.1"></use><use href="#cap" x="32.4" y="36.1"></use><use href="#cap" x="36.6" y="36.1"></use><use href="#cap" x="38" y="36.1"></use>
@@ -100,22 +101,22 @@
 <use href="#capv" x="59.2" y="13"></use><use href="#capv" x="59.2" y="17.6"></use><use href="#res" x="20.6" y="9"></use><use href="#res" x="20.6" y="10.2"></use>
 <use href="#cap" x="3" y="17"></use><use href="#capv" x="7" y="33.4"></use><use href="#res" x="44.5" y="50"></use><use href="#cap" x="56" y="47"></use><use href="#cap" x="56" y="48.4"></use>
 
-<rect x="58.4" y="7.2" width="5.6" height="2.8" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1" filter="url(#soft)"></rect>
+<rect x="58.35" y="7.3" width="5.9" height="3.1" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="58.4" y="7.2" width="5.6" height="2.8" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1"></rect>
 <rect x="59" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="60.3" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="61.6" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="62.9" y="8.1" width="0.6" height="0.6" fill="#3a3a3a"></rect>
 
 <g transform="translate(0 35.6)">
-<rect x="65.5" y="2" width="22" height="16.5" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="65.45" y="2.1" width="22.3" height="16.8" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="65.5" y="2" width="22" height="16.5" rx="0.4" fill="url(#metal)"></rect>
 <rect x="66.4" y="2.9" width="20.2" height="14.7" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.18"></rect>
 <g stroke="#a6acb3" stroke-width="0.14" stroke-opacity="0.8"><path d="M70.5 6.2H83.5M70.5 8.2H83.5M70.5 10.2H83.5M70.5 12.2H83.5M70.5 14.2H83.5"></path></g>
 <rect x="67.4" y="4" width="2.2" height="1.1" rx="0.2" fill="#aeb4bb"></rect><rect x="67.4" y="13.4" width="2.2" height="1.1" rx="0.2" fill="#aeb4bb"></rect>
-<circle class="blink" cx="87.6" cy="3.8" r="1.4" fill="#3ddc84" opacity="0.5" filter="url(#glow)"></circle>
+<circle class="blink" cx="87.6" cy="3.8" r="2.1" fill="url(#glow-g)" opacity="0.5"></circle>
 <rect class="blink" x="87.1" y="3" width="0.9" height="1.6" fill="#3ddc84"></rect>
-<circle class="flicker" cx="87.6" cy="16.7" r="1.4" fill="#f5b94a" opacity="0.5" filter="url(#glow)"></circle>
+<circle class="flicker" cx="87.6" cy="16.7" r="2.1" fill="url(#glow-a)" opacity="0.5"></circle>
 <rect class="flicker" x="87.1" y="15.9" width="0.9" height="1.6" fill="#f5b94a"></rect>
 </g>
 
 <g transform="translate(0 -0.8)">
-<rect x="69.5" y="21" width="17.5" height="14" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="69.45" y="21.1" width="17.8" height="14.3" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="69.5" y="21" width="17.5" height="14" rx="0.4" fill="url(#metal)"></rect>
 <rect x="70.3" y="21.8" width="15.9" height="12.4" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.16"></rect>
 <path d="M70.3 28H86.2" stroke="#9aa1a9" stroke-width="0.16"></path>
 <circle cx="73" cy="24.9" r="0.45" fill="#a6acb3"></circle><circle cx="73" cy="31.1" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="24.9" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="31.1" r="0.45" fill="#a6acb3"></circle>
@@ -123,35 +124,35 @@
 </g>
 
 <g transform="translate(0 -36.6)">
-<rect x="69.5" y="39" width="17.5" height="14" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="69.45" y="39.1" width="17.8" height="14.3" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="69.5" y="39" width="17.5" height="14" rx="0.4" fill="url(#metal)"></rect>
 <rect x="70.3" y="39.8" width="15.9" height="12.4" rx="0.3" fill="none" stroke="#8f969e" stroke-width="0.16"></rect>
 <path d="M70.3 46H86.2" stroke="#9aa1a9" stroke-width="0.16"></path>
 <circle cx="73" cy="42.9" r="0.45" fill="#a6acb3"></circle><circle cx="73" cy="49.1" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="42.9" r="0.45" fill="#a6acb3"></circle><circle cx="83.5" cy="49.1" r="0.45" fill="#a6acb3"></circle>
 <rect x="86.3" y="40.3" width="0.7" height="4.9" fill="#26292d"></rect><rect x="86.3" y="46.8" width="0.7" height="4.9" fill="#26292d"></rect>
 </g>
 
-<rect x="45.8" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)" filter="url(#soft)"></rect><rect x="45.8" y="37.5" width="1" height="13" fill="#1b1d20"></rect>
-<rect x="50.2" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)" filter="url(#soft)"></rect><rect x="50.2" y="37.5" width="1" height="13" fill="#1b1d20"></rect>
-<rect x="0.3" y="19" width="4" height="15" rx="0.2" fill="url(#cream)" filter="url(#soft)"></rect><rect x="3.3" y="19" width="1" height="15" fill="#1b1d20"></rect>
+<rect x="45.75" y="37.6" width="3.7" height="13.3" rx="0.2" fill="#000" fill-opacity="0.4"></rect><rect x="45.8" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)"></rect><rect x="45.8" y="37.5" width="1" height="13" fill="#1b1d20"></rect>
+<rect x="50.15" y="37.6" width="3.7" height="13.3" rx="0.2" fill="#000" fill-opacity="0.4"></rect><rect x="50.2" y="37.5" width="3.4" height="13" rx="0.2" fill="url(#cream)"></rect><rect x="50.2" y="37.5" width="1" height="13" fill="#1b1d20"></rect>
+<rect x="0.25" y="19.1" width="4.3" height="15.3" rx="0.2" fill="#000" fill-opacity="0.4"></rect><rect x="0.3" y="19" width="4" height="15" rx="0.2" fill="url(#cream)"></rect><rect x="3.3" y="19" width="1" height="15" fill="#1b1d20"></rect>
 
-<rect x="5.5" y="36" width="4" height="2.6" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1" filter="url(#soft)"></rect>
+<rect x="5.45" y="36.1" width="4.3" height="2.9" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="5.5" y="36" width="4" height="2.6" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1"></rect>
 <rect x="6.4" y="37" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="8" y="37" width="0.6" height="0.6" fill="#3a3a3a"></rect>
-<rect x="30.4" y="52.4" width="4.2" height="2.6" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1" filter="url(#soft)"></rect>
+<rect x="30.35" y="52.5" width="4.5" height="2.9" rx="0.3" fill="#000" fill-opacity="0.4"></rect><rect x="30.4" y="52.4" width="4.2" height="2.6" rx="0.3" fill="#eeeae0" stroke="#c7c1b2" stroke-width="0.1"></rect>
 <rect x="31" y="53.4" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="32.2" y="53.4" width="0.6" height="0.6" fill="#3a3a3a"></rect><rect x="33.4" y="53.4" width="0.6" height="0.6" fill="#3a3a3a"></rect>
 
-<rect x="0.2" y="40.8" width="3.6" height="3.6" rx="0.6" fill="#1b1d20" filter="url(#soft)"></rect>
+<rect x="0.15" y="40.9" width="3.9" height="3.9" rx="0.6" fill="#000" fill-opacity="0.4"></rect><rect x="0.2" y="40.8" width="3.6" height="3.6" rx="0.6" fill="#1b1d20"></rect>
 <circle cx="2" cy="42.6" r="1.1" fill="#2e3237" stroke="#4a4e55" stroke-width="0.15"></circle>
 
-<circle cx="5.8" cy="45.55" r="1.5" fill="#ff4d4d" opacity="0.55" filter="url(#glow)"></circle>
+<circle cx="5.8" cy="45.55" r="2.25" fill="url(#glow-r)" opacity="0.55"></circle>
 <rect x="5.2" y="45.2" width="1.2" height="0.7" rx="0.1" fill="#ff5c5c"></rect>
-<circle class="flicker" cx="5.8" cy="46.95" r="1.5" fill="#3ddc84" opacity="0.55" filter="url(#glow)"></circle>
+<circle class="flicker" cx="5.8" cy="46.95" r="2.25" fill="url(#glow-g)" opacity="0.55"></circle>
 <rect class="flicker" x="5.2" y="46.6" width="1.2" height="0.7" rx="0.1" fill="#5ff09c"></rect>
 
-<rect x="7.2" y="50.2" width="9.4" height="7.6" rx="1.2" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="7.15" y="50.3" width="9.7" height="7.9" rx="1.2" fill="#000" fill-opacity="0.4"></rect><rect x="7.2" y="50.2" width="9.4" height="7.6" rx="1.2" fill="url(#metal)"></rect>
 <rect x="8.1" y="56.3" width="7.6" height="1.2" rx="0.6" fill="#15171a"></rect>
-<rect x="22.3" y="51" width="7" height="6.6" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="22.25" y="51.1" width="7.3" height="6.9" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="22.3" y="51" width="7" height="6.6" rx="0.4" fill="url(#metal)"></rect>
 <rect x="23" y="56.5" width="5.6" height="0.9" rx="0.2" fill="#15171a"></rect>
-<rect x="35.7" y="51" width="7" height="6.6" rx="0.4" fill="url(#metal)" filter="url(#soft)"></rect>
+<rect x="35.65" y="51.1" width="7.3" height="6.9" rx="0.4" fill="#000" fill-opacity="0.4"></rect><rect x="35.7" y="51" width="7" height="6.6" rx="0.4" fill="url(#metal)"></rect>
 <rect x="36.4" y="56.5" width="5.6" height="0.9" rx="0.2" fill="#15171a"></rect>
 
 <g font-family="Inter, sans-serif" fill="#f2f5f0">

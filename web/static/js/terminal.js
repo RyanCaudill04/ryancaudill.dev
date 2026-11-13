@@ -47,7 +47,7 @@ export function startTerminal(root, { stage } = {}) {
 
   // What the page says, read back out of it.
   const text = (node, sel) => node.querySelector(sel)?.textContent.trim() || '';
-  const row = (node, id) => ({ id, host: text(node, '.unit__host'), desc: text(node, '.unit__desc'), url: node.getAttribute('href') || '' });
+  const row = (node, id) => ({ id, host: text(node, '.unit__host'), desc: text(node, '.unit__desc'), url: node.getAttribute('href') || '', node });
   const units = [...root.querySelectorAll('[data-unit]')].map((n) => row(n, n.dataset.unit));
   const past = [...root.querySelectorAll('[data-past]')].map((n) => row(n, n.dataset.past));
   const page = {
@@ -59,6 +59,9 @@ export function startTerminal(root, { stage } = {}) {
     jobs: [...document.querySelectorAll('.entries--now li')].map((li) => ({ when: text(li, '.when'), title: text(li, 'b'), org: text(li, '.org') })),
     pdf: document.querySelector('.resume .btn')?.getAttribute('href') || '',
   };
+  // A project's live state, read from its row when the command runs.
+  const live = (u) => ({ state: u.node.dataset.state, text: text(u.node, '[data-state-text]') });
+  const dot = { up: 'ok', sleeping: 'warn', starting: 'warn', down: 'err' };
   const find = (id) => units.find((u) => u.id === id) || past.find((u) => u.id === id);
 
   const pad = (s, n) => s + ' '.repeat(Math.max(1, n - s.length));
@@ -75,15 +78,17 @@ export function startTerminal(root, { stage } = {}) {
       return [[el('div', 'term__ls', ...list.flatMap((u) => [u.url ? link(u.url, u.id) : el('span', {}, u.id), el('span', 'dim', u.desc)]))]];
     },
     systemctl: (verb, id) => {
-      if (verb === 'list-units') return units.map((u) => [el('span', 'ok', '● '), pad(u.id, 16), el('span', 'dim', 'active (running)')]);
+      if (verb === 'list-units') return units.map((u) => { const l = live(u); return [el('span', dot[l.state] || 'dim', '● '), pad(u.id, 16), el('span', 'dim', l.text)]; });
       if (verb !== 'status' || !id) return [el('span', 'dim', 'usage: systemctl status <unit>   (units: ' + units.map((u) => u.id).join(', ') + ')')];
       const u = find(id.replace(/\.service$/, ''));
       if (!u) return [el('span', 'err', `Unit ${id}.service could not be found.`)];
-      const live = units.includes(u);
+      const active = units.includes(u);
+      const l = active ? live(u) : { state: 'dead', text: 'inactive (dead)' };
+      const cls = dot[l.state] || 'dim';
       return [
-        [el('span', live ? 'ok' : 'dim', live ? '● ' : '○ '), el('span', 'hi', `${u.id}.service`), ` - ${u.desc}`],
-        [el('span', 'dim', '     Loaded: '), `loaded (${live ? 'enabled' : 'disabled'})`],
-        [el('span', 'dim', '     Active: '), el('span', live ? 'ok' : 'dim', live ? 'active (running)' : 'inactive (dead)')],
+        [el('span', cls, active ? '● ' : '○ '), el('span', 'hi', `${u.id}.service`), ` - ${u.desc}`],
+        [el('span', 'dim', '     Loaded: '), `loaded (${active ? 'enabled' : 'disabled'})`],
+        [el('span', 'dim', '     Active: '), el('span', cls, l.text)],
         ...(u.host ? [[el('span', 'dim', '       Host: '), u.url ? link(u.url, u.host) : u.host]] : []),
         ...(!u.host && u.url ? [[el('span', 'dim', '     Source: '), link(u.url)]] : []),
       ];

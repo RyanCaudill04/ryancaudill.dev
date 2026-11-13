@@ -12,10 +12,11 @@ help: ## List the commands
 dev: ## Preview locally; edits to content/ and web/ show on refresh
 	go run . -dev -addr $(DEV_ADDR)
 
-test: ## Format check, vet and tests
+test: ## Format check, vet, Go tests and status function tests
 	@test -z "$$(gofmt -l .)" || { echo "gofmt needed on:"; gofmt -l .; exit 1; }
 	go vet ./...
 	go test ./...
+	node --test tests/*.test.js
 
 build: ## Build the static site into dist/, as Cloudflare Pages does
 	go run . -out dist -version $(VERSION)

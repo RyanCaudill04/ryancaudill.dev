@@ -71,30 +71,39 @@ links:
   - label: GitHub
     url: https://github.com/RyanCaudill04
 
-# Active projects: one row each in the terminal, with a light (always on
-# for now).
+# Active projects: one row each in the terminal, with a live status light.
 #   id          the unit name shown in the terminal
 #   host        the address shown
 #   url         where the row links; leave out when it isn't a web page
+#   health      a public URL the status function (functions/api/status.js)
+#               checks for the light; leave out = grey "not monitored"
+#   state_field a JSON field in the health answer holding the state
+#               (active / sleeping / starting / offline); leave out = any 2xx is up
 projects:
   - id: ai-gateway
     host: ai.ryancaudill.dev
     url: https://ai.ryancaudill.dev
     description: OpenAI-compatible gateway over free-tier LLM providers, with a chat UI
+    # Not deployed yet (see issue #7). When it is, add: health: https://ai.ryancaudill.dev/<path>
 
   - id: play
     host: play.ryancaudill.dev
     url: https://play.ryancaudill.dev
     description: Live status, players and world map for the Minecraft server
+    health: https://play.ryancaudill.dev/api/status
+    state_field: state
 
   - id: minecraft
     host: mc.ryancaudill.dev
     description: Minecraft Java server; sleeps until someone joins
+    health: https://play.ryancaudill.dev/api/status
+    state_field: state
 
   - id: admin
     host: admin.ryancaudill.dev
     url: https://admin.ryancaudill.dev
     description: Runs the Minecraft server; sign-in required
+    health: https://admin.ryancaudill.dev/healthz
 
 # Past projects, hidden until `ls --archive` is typed in the shell. Empty hides it entirely.
 archive:

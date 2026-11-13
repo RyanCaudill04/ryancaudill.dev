@@ -8,7 +8,13 @@ The page opens on a 3D model of that Pi: the board, the GeeekPi P33 M.2 NVMe PoE
 
 ## Edit the content
 
-Everything the page says is in **[`content/site.yaml`](content/site.yaml)**: your name and intro, the hardware cards, the projects, past projects and the resume. Add a project there, and a row with its own light appears. For now every active project's light is always on.
+Everything the page says is in **[`content/site.yaml`](content/site.yaml)**: your name and intro, the hardware cards, the projects, past projects and the resume. Add a project there, and a row with its own light appears. Give it a `health:` URL (and `state_field:` if the answer is JSON) and the light shows the project's real state; see [Status lights](#status-lights).
+
+## Status lights
+
+Each active project's light shows its real state: green up, amber sleeping or starting, red down, hollow grey not monitored. [`functions/api/status.js`](functions/api/status.js) is a Cloudflare Pages Function that checks each project's public `health:` URL (play and mc share `https://play.ryancaudill.dev/api/status`, admin uses `https://admin.ryancaudill.dev/healthz`), with 2 seconds per check, and caches the answer at the edge for 10 seconds. [`status.js`](web/static/js/status.js) reads `GET /api/status` and refreshes the lights every 15 seconds while the tab is visible. The build writes the health URLs from `site.yaml` to `status-targets.json` for the function to read. `make dev` has no functions, so the lights stay grey there.
+
+Admin is behind Cloudflare Access, so it shows grey until the function can sign in: create an Access service token, allow it in admin's policy, and add its `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` as secrets on the Pages project.
 
 ## The 3D model
 
@@ -38,13 +44,13 @@ Then open <http://127.0.0.1:8090>. The content and templates are reread on every
 make test
 ```
 
-`make test` checks formatting, runs `go vet`, and runs the tests. The tests build the real site, so a typo in `site.yaml` or a template fails here instead of on Cloudflare. They also check that every file the pages and scripts load is in the build.
+`make test` checks formatting, runs `go vet`, the Go tests and the status function's tests (needs Node). The tests build the real site, so a typo in `site.yaml` or a template fails here instead of on Cloudflare. They also check that every file the pages and scripts load is in the build.
 
 ```bash
 make build
 ```
 
-`make build` writes the site into `dist/` exactly as Cloudflare does: `index.html`, `404.html`, `_headers`, `robots.txt` and `static/`.
+`make build` writes the site into `dist/` exactly as Cloudflare does: `index.html`, `404.html`, `_headers`, `robots.txt`, `status-targets.json` and `static/`.
 
 ## Deploy
 
@@ -89,6 +95,8 @@ npx esbuild node_modules/three/build/three.module.js --bundle --minify --format=
 ## Layout
 
 ```
+functions/api/      status.js, the Pages Function behind GET /api/status
+tests/              tests for the function (node --test)
 main.go             flags: build into dist/, or -dev for a local preview
 site.go             loads the content and templates, builds dist/, dev server (+ test)
 internal/content/   loads and checks content/site.yaml (+ test)
@@ -101,6 +109,7 @@ web/static/js/      main.js      the page: header, scroll effects, starts the re
                     model.js     the Pi, cooler, HAT and SSD, part by part
                     textures.js  the boards' traces, silkscreen and labels
                     terminal.js  the prompt in the projects terminal
+                    status.js    refreshes the status lights
                     boot.js      marks the page as scripted before it paints
 web/static/fonts/   the three typefaces, and their licences
 web/static/vendor/  three.js

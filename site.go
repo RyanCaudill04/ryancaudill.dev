@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -24,7 +25,7 @@ var pages = []string{"index.html", "404.html"}
 
 // Files in web/ copied as-is to the root of the output folder: response
 // headers for Cloudflare Pages, and the crawler rules at /robots.txt.
-var rootFiles = []string{"_headers", "robots.txt"}
+var rootFiles = []string{"_headers", "robots.txt", "favicon.ico"}
 
 // funcs are the helpers the templates can call.
 var funcs = template.FuncMap{
@@ -64,10 +65,31 @@ func (s *site) render(name, version string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// statusTargetsFile is read by the status function through the Pages asset
+// binding, so the health URLs live only in content/site.yaml.
+const statusTargetsFile = "status-targets.json"
+
+// statusTargets is the JSON the status function reads: one entry per
+// project, with only the fields it needs.
+func statusTargets(projects []content.Project) ([]byte, error) {
+	type target struct {
+		ID         string `json:"id"`
+		URL        string `json:"url,omitempty"`
+		StateField string `json:"stateField,omitempty"`
+	}
+	list := make([]target, 0, len(projects))
+	for _, p := range projects {
+		list = append(list, target{p.ID, p.Health, p.StateField})
+	}
+	return json.MarshalIndent(list, "", "  ")
+}
+
 // build writes the whole site into out, replacing what was there:
 //
 //	index.html, 404.html   the rendered pages
 //	_headers, robots.txt   copied from web/
+//	favicon.ico            copied from web/ (browsers ask for it at the root)
+//	status-targets.json    what functions/api/status.js checks, from site.yaml
 //	static/                everything in web/static
 func build(files fs.FS, out, version string) error {
 	if clean := filepath.Clean(out); clean == "." || clean == "/" {
@@ -100,6 +122,13 @@ func build(files fs.FS, out, version string) error {
 		if err := os.WriteFile(filepath.Join(out, name), data, 0o644); err != nil {
 			return err
 		}
+	}
+	targets, err := statusTargets(st.content.Projects)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(out, statusTargetsFile), targets, 0o644); err != nil {
+		return err
 	}
 	static, err := fs.Sub(files, "web/static")
 	if err != nil {
@@ -178,6 +207,10 @@ func serve(addr string, files fs.FS) error {
 	mux.HandleFunc("GET /robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		http.ServeFileFS(w, r, files, "web/robots.txt")
+	})
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		http.ServeFileFS(w, r, files, "web/favicon.ico")
 	})
 	mux.HandleFunc("/", page("404.html", http.StatusNotFound))
 

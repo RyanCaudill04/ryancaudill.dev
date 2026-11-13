@@ -142,12 +142,12 @@
         <ul class="units">
           {{- range .Site.Projects}}
           <li>
-            {{- if .URL}}<a class="unit" href="{{.URL}}" data-unit="{{.ID}}">{{else}}<div class="unit" data-unit="{{.ID}}">{{end}}
+            {{- if .URL}}<a class="unit" href="{{.URL}}" data-unit="{{.ID}}" data-state="unknown">{{else}}<div class="unit" data-unit="{{.ID}}" data-state="unknown">{{end}}
               <span class="led"></span>
               <span class="unit__id">{{.ID}}</span>
               <span class="unit__host">{{.Host}}</span>
               <span class="unit__desc">{{.Description}}</span>
-              <span class="unit__state">active (running)</span>
+              <span class="unit__state" data-state-text>checking…</span>
             {{if .URL}}</a>{{else}}</div>{{end}}
           </li>
           {{- end}}

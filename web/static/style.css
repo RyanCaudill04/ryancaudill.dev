@@ -28,13 +28,15 @@
   --text: #f0efe9;
   --text-2: #c9cbc5;
   --muted: #a0a59e;
-  --faint: #7f847e;
+  --faint: #8a8f88; /* 5.2:1 on the darkest panel, up from 4.5:1 at #7f847e */
 
   /* Two accents with one job each: green is anything live or clickable,
      raspberry is an annotation pointing at something. */
   --up: #3ddc84;
   --up-hi: #8ff0b8;
   --berry: #ff5f8f;
+  --sleep: #f5b94a;
+  --down: #ff5c5c;
   --off: #5a6069;
 
   --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
@@ -46,7 +48,10 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: var(--top); scrollbar-color: #2b3036 var(--bg); }
+html { scroll-behavior: smooth; scrollbar-color: #2b3036 var(--bg); }
+/* Anchored sections stop short of the fixed header. (Set per section, not on
+   html, so the offset isn't counted twice.) */
+section[id] { scroll-margin-top: var(--top); }
 body {
   margin: 0;
   background: var(--bg);
@@ -101,10 +106,15 @@ button { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: 4px;
   padding: 8px 12px; border-radius: 999px;
   color: var(--muted); text-decoration: none; font-size: 14px;
-  transition: color 0.2s, background-color 0.2s;
+  transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
 }
 .top nav a:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
-.top nav a[aria-current] { color: var(--text); }
+.top nav a:focus-visible { border-radius: 999px; outline-offset: 2px; }
+.top nav a[aria-current] { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+/* Touch: a bigger target without making the bar any taller. */
+@media (pointer: coarse) {
+  .top nav a { min-height: 44px; padding-block: 0; }
+}
 .top nav .icon { font-size: 13px; opacity: 0.7; }
 @media (max-width: 700px) {
   .top nav .nav--wide { display: none; }
@@ -141,10 +151,11 @@ button { font: inherit; color: inherit; }
   border: 1px solid #353a41; border-radius: 999px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--text); font-weight: 500; font-size: 15px; text-decoration: none; white-space: nowrap;
-  transition: border-color 0.25s, background-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s;
+  transition: color 0.16s var(--ease), border-color 0.16s var(--ease), background-color 0.16s var(--ease), transform 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
-.btn .icon { transition: transform 0.25s var(--ease); }
+.btn .icon { transition: transform 0.16s var(--ease); }
 .btn:hover { color: var(--text); border-color: var(--muted); transform: translateY(-1px); }
+.btn:focus-visible { border-radius: 999px; outline-offset: 4px; }
 .btn:hover .icon { transform: translateY(2px); }
 .btn:active { transform: translateY(0); }
 .btn--primary { background: var(--up); border-color: var(--up); color: #04130a; font-weight: 600; }
@@ -154,14 +165,19 @@ button { font: inherit; color: inherit; }
 }
 
 /* ---------- Status lights ----------
-   Constant on for now; live status is on the to-do list.
-   Past projects (data-state="dead") get an unlit, hollow light. */
+   A row's data-state sets the light inside it:
+   up · sleeping · starting · down · unknown (hollow) · dead (past projects).
+   The hero pill has no data-state and stays lit. */
 .led {
   display: inline-block; flex: none;
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--up); box-shadow: 0 0 8px var(--up);
 }
-[data-state="dead"] .led { background: none; box-shadow: none; border: 1.5px solid var(--off); }
+[data-state="unknown"] .led, [data-state="dead"] .led { background: none; box-shadow: none; border: 1.5px solid var(--off); }
+[data-state="sleeping"] .led, [data-state="starting"] .led { background: var(--sleep); box-shadow: 0 0 8px var(--sleep); }
+[data-state="starting"] .led { animation: blink 0.8s ease-in-out infinite; }
+[data-state="down"] .led { background: var(--down); box-shadow: 0 0 8px var(--down); }
+[data-state="down"] .unit__state { color: var(--down); }
 
 /* ---------- Stage: the pinned 3D canvas and what scrolls over it ---------- */
 .stage { position: relative; display: grid; }
@@ -253,6 +269,7 @@ button { font: inherit; color: inherit; }
   background: radial-gradient(ellipse at 50% 50%, rgba(61, 220, 132, 0.13), rgba(9, 10, 11, 0) 68%);
 }
 .pi { display: block; width: 100%; max-width: 620px; height: auto; overflow: visible; }
+.slot__art:has(.pi) { contain: paint; }
 .slot figcaption {
   display: flex; flex-wrap: wrap; gap: 4px 20px; justify-content: center;
   font: 12px var(--mono); color: var(--faint); text-align: center;
@@ -286,6 +303,8 @@ button { font: inherit; color: inherit; }
 /* LEDs inside the fallback illustration */
 .pi .blink { animation: blink 2.2s ease-in-out infinite; }
 .pi .flicker { animation: flicker 1.4s steps(1) infinite; }
+.pi .blink, .pi .flicker { will-change: opacity; }
+.pi.is-paused .blink, .pi.is-paused .flicker { animation-play-state: paused; }
 
 /* ---------- Hardware: the teardown ----------
    With the 3D model (.has-3d, set by main.js before the scene loads) the
@@ -372,14 +391,15 @@ button { font: inherit; color: inherit; }
 .units { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
 .unit {
   display: grid;
-  grid-template-columns: 24px 160px 230px minmax(220px, 1fr) 150px;
+  grid-template-columns: 24px minmax(110px, 160px) minmax(120px, 230px) minmax(0, 1fr) minmax(90px, 150px);
   gap: 12px; align-items: center;
   min-height: 46px; padding: 8px 12px; border-radius: 8px;
   color: var(--text); text-decoration: none;
-  transition: background-color 0.2s;
+  transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
 }
 a.unit:hover { background: var(--panel-hi); color: var(--text); }
 a.unit:hover .unit__state { color: var(--text-2); }
+.unit__state { transition: color 0.16s var(--ease); }
 .unit__host { color: var(--up); }
 .unit__desc, .unit__state { color: var(--muted); }
 .unit__state { text-align: right; }
@@ -418,6 +438,7 @@ a.unit:hover .unit__state { color: var(--text-2); }
 .term__ls { display: grid; grid-template-columns: max-content 1fr; gap: 0 2ch; white-space: normal; }
 .term__out .dim { color: var(--faint); }
 .term__out .ok { color: var(--up); }
+.term__out .warn { color: var(--sleep); }
 .term__out .err { color: #ff8f8f; }
 .term__out .berry { color: var(--berry); }
 .term__out .hi { color: var(--text); font-weight: 700; }
@@ -497,6 +518,26 @@ a.unit:hover .unit__state { color: var(--text-2); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
   html { scroll-behavior: auto; }
+}
+
+/* Progressive enhancement: sections ease in as they reach the screen, driven
+   by scroll position. Only opacity and transform; off under reduced motion. */
+@keyframes section-in { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
+@keyframes section-fade { from { opacity: 0; } to { opacity: 1; } }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .about, .projects, .resume {
+      animation: section-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    /* The teardown is pinned with sticky and has its own scroll, so it only fades. */
+    .teardown {
+      animation: section-fade linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
 }
 
 /* ---------- Narrow screens: one column, the Pi between the name and the text ---------- */
