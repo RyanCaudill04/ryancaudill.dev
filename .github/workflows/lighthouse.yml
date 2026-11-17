@@ -1,5 +1,8 @@
 # Builds the site, serves dist/, and runs Lighthouse (mobile profile) against
-# it. Budgets for LCP, CLS, TBT, total transfer and accessibility live in
+# it. CI runners have no GPU, and software WebGL stalls the main thread for
+# minutes, so lighthouserc.json turns WebGL off and this audits the page's
+# no-3D fallback; the 3D stage's cost is checked by hand on real hardware.
+# Budgets for LCP, CLS, TBT, total transfer and accessibility live in
 # lighthouserc.json; the job fails when a change pushes past them.
 name: Lighthouse
 
