@@ -12,6 +12,12 @@
 /static/*
   Cache-Control: public, max-age=300
 
+# Fonts are versioned by filename, so they can be cached for a year. The `!`
+# detaches the 5-minute rule above, which would otherwise be merged in.
+/static/fonts/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
 # Keep the *.pages.dev copies of the site out of search results.
 https://:project.pages.dev/*
   X-Robots-Tag: noindex

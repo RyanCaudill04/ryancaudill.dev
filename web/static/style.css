@@ -20,6 +20,22 @@
   src: url("/static/fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
 }
 
+/* Local fallbacks resized to match each web font's metrics, so the swap from
+   fallback to web font doesn't shift layout. Values are measured from the font
+   files against Arial, Georgia and Courier New. */
+@font-face {
+  font-family: "Inter Fallback"; src: local("Arial");
+  size-adjust: 107.6%; ascent-override: 90.1%; descent-override: 22.4%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Serif Fallback"; src: local("Georgia");
+  size-adjust: 75.9%; ascent-override: 130.4%; descent-override: 40.8%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JetBrains Mono Fallback"; src: local("Courier New");
+  size-adjust: 100%; ascent-override: 102%; descent-override: 30%; line-gap-override: 0%;
+}
+
 :root {
   --bg: #090a0b;
   --panel: #101214;
@@ -37,9 +53,9 @@
   --berry: #ff5f8f;
   --off: #5a6069;
 
-  --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-  --sans: "Inter", system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --serif: "Instrument Serif", "Instrument Serif Fallback", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Inter", "Inter Fallback", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace, "SF Mono", Menlo, monospace;
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --top: 64px; /* header height */
